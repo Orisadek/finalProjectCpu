@@ -7,21 +7,22 @@ USE work.aux_package.all;
 
 
 ENTITY MIPS IS
-	generic ( AluOpSize : positive := 9;
+	generic (  isModelSim  : boolean := TRUE;
+			  adress_size  : positive :=8;
+				AluOpSize : positive := 9;
 			  ResSize : positive := 32;
 			  shamt_size: positive := 5;
 			  PC_size : positive := 10;
 			  change_size: positive := 8;
 			  Imm_size: positive := 26;
 			  clkcnt_size: positive := 16;
-			  address_size_orig :positive:=12;
-			  isModelSim  : boolean :=TRUE;
-			  adress_size  : positive :=8
+			  address_size_orig :positive:=12
 			); 
 	PORT( reset,ena, clock		: IN 	STD_LOGIC; 
 		Memwrite_out,MemRead_out: OUT 	STD_LOGIC ;
 		Address_Bus   			: OUT 	STD_LOGIC_VECTOR( address_size_orig-1 DOWNTO 0 );
-		Data_Bus   			    : INOUT STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 ));
+		Data_Bus   			    : INOUT STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 )
+		);
 END 	MIPS;
 
 ARCHITECTURE structure OF MIPS IS
@@ -42,10 +43,10 @@ ARCHITECTURE structure OF MIPS IS
 	SIGNAL MemWrite 		: STD_LOGIC;
 	SIGNAL MemtoReg 		: STD_LOGIC_VECTOR( 1 DOWNTO 0 );
 	SIGNAL MemRead 			: STD_LOGIC;
-	SIGNAL ALUop 			: STD_LOGIC_VECTOR(  AluOpSize-1 DOWNTO 0 );
+	SIGNAL ALUop 			: STD_LOGIC_VECTOR( AluOpSize-1 DOWNTO 0 );
 	SIGNAL Instruction		: STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
 	SIGNAL JumpAdress		: STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
-	
+	SIGNAL read_data_mem 	: STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
 	alias address is ALU_Result(address_size_orig-1 DOWNTO 0);
 	alias isGPIO  is address(address_size_orig-1);
 BEGIN
@@ -55,14 +56,15 @@ BEGIN
    Address_Bus      <= address;
    Data_Bus			<= read_data_2 when (MemWrite='1' and isGPIO='1') else (others=>'Z'); -- if we're in GPIO and want to write data - insert data' else - high z
    
+   read_data		<= read_data_mem when isGPIO='0' else 
+					   Data_Bus;
 --------------------------- connect the 5 MIPS components----------------------------------------------------------   
   IFE :Ifetch GENERIC MAP(isModelSim,adress_size) PORT MAP (	
 				Instruction 	=> Instruction,
     	    	PC_plus_4_out 	=> PC_plus_4,
 				Add_result 		=> Add_result,
 				Branch 			=> Branch,
-				Zero 			=> Zero,
-				--PC_out 			=> PC,        		
+				Zero 			=> Zero,     		
 				clock 			=> clock,  
 				reset 			=> reset,
 				data_reg 	    => read_data_1,
@@ -116,7 +118,7 @@ BEGIN
 				Reset			=> reset );
 
    MEM: dmemory generic MAP(isModelSim,adress_size) PORT MAP (	
-				read_data 		=> read_data,
+				read_data 		=> read_data_mem,
 				address 		=> address,--- address to write/read
 				write_data 		=> read_data_2, -- data to write
 				MemRead 		=> MemRead, 
@@ -128,7 +130,7 @@ BEGIN
 	PORT MAP (
 			instruction 	=> Instruction( 25 DOWNTO 0 ),
 			PC_plus_4_out   => PC_plus_4(3 DOWNTO 0 ),
-			JumpAdress		=>JumpAdress
+			JumpAdress		=> JumpAdress
 			);
 
 

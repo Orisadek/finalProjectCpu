@@ -47,7 +47,7 @@ inst_memory: altsyncram
 		widthad_a => address_size,
 		lpm_type => "altsyncram",
 		outdata_reg_a => "UNREGISTERED",
-		init_file => "C:\Users\orisa\source\modelSim\work\L1_Caches\testing\test7_prog.hex",
+		init_file => "C:\Users\orisa\source\modelSim\work\L1_Caches\hex\prog_hex1.hex",
 		intended_device_family => "Cyclone"
 	)
 	PORT MAP (
@@ -86,7 +86,7 @@ inst_memory: altsyncram
 		BEGIN
 		--	WAIT UNTIL ( clock'EVENT ) AND ( clock = '1' );
 			IF (reset = '1')THEN
-				   PC(PC_size-1 DOWNTO 2) <= "00000000" ; 
+				   PC(PC_size-1 DOWNTO 2) <= (others=>'0') ; 
 			elsif( clock'EVENT  AND clock = '1') then
 				   PC(PC_size-1 DOWNTO 2 ) <= next_PC;
 			END IF;

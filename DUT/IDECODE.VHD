@@ -20,7 +20,7 @@ generic ( AluOpSize : positive := 9;
 	  PORT(	read_data_1	: OUT 	STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
 			read_data_2	: OUT 	STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
 			Instruction : IN 	STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
-			read_data 	: IN 	STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
+			read_data 	: IN 	STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );   
 			ALU_result	: IN 	STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
 			RegWrite 	: IN 	STD_LOGIC;
 			MemtoReg 	: IN 	STD_LOGIC_VECTOR( 1 DOWNTO 0 );
@@ -62,14 +62,16 @@ BEGIN
 					-- Read Register 2 Operation		 
 	read_data_2 <= register_array( CONV_INTEGER( read_register_2_address ) );
 					-- Mux for Register Write Address
-
+	
+	
    write_register_address <= write_register_address_1 WHEN RegDst = "01"  ELSE 
 							write_register_address_0  WHEN RegDst = "00"  ELSE 
 							CONV_STD_LOGIC_VECTOR( ResSize-1, cmd_size ) WHEN RegDst = "10"  ELSE 
 							(others=>'0');
+							
 					-- Mux to bypass data memory for Rformat instructions
 	write_data <= ALU_result( ResSize-1 DOWNTO 0 ) WHEN ( MemtoReg = "00" ) ELSE 
-				  read_data WHEN ( MemtoReg = "01" ) ELSE  
+				  read_data  WHEN ( MemtoReg = "01" ) ELSE  
 				  zeroes(ResSize-1 downto PC_size )&PC_plus_4 WHEN ( MemtoReg = "10" ) ELSE   
 				  (others=>'0');
 					-- Sign Extend 16-bits to 32-bits

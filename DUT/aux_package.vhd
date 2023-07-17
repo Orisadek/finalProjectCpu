@@ -5,25 +5,23 @@ USE IEEE.STD_LOGIC_ARITH.ALL;
 package aux_package is
 
 COMPONENT MIPS IS
-		generic ( AluOpSize : positive := 9;
+	generic (  isModelSim  : boolean := TRUE;
+			  adress_size  : positive :=8;
+				AluOpSize : positive := 9;
 			  ResSize : positive := 32;
 			  shamt_size: positive := 5;
 			  PC_size : positive := 10;
 			  change_size: positive := 8;
 			  Imm_size: positive := 26;
 			  clkcnt_size: positive := 16;
-		     isModelSim  : boolean;
-			 adress_size  : positive
+			  address_size_orig :positive:=12
 			); 
-	PORT( reset, clock					: IN 	STD_LOGIC; 
-		PC								: OUT  STD_LOGIC_VECTOR( PC_size-1 DOWNTO 0 );
-		CLKCNT							: OUT  STD_LOGIC_VECTOR( clkcnt_size-1 DOWNTO 0 );
-		ALU_result_out, read_data_1_out, read_data_2_out, write_data_out,	
-     	Instruction_out					: OUT 	STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
-		Branch_out                      : OUT 	STD_LOGIC_VECTOR(1 DOWNTO 0 );
-		Zero_out, Memwrite_out, 
-		Regwrite_out					: OUT 	STD_LOGIC );
-END COMPONENT;
+	PORT( reset,ena, clock		: IN 	STD_LOGIC; 
+		Memwrite_out,MemRead_out: OUT 	STD_LOGIC ;
+		Address_Bus   			: OUT 	STD_LOGIC_VECTOR( address_size_orig-1 DOWNTO 0 );
+		Data_Bus   			    : INOUT STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 )
+		);
+END 	COMPONENT;
 
 
 
@@ -137,14 +135,37 @@ COMPONENT jmp_unit IS
 END COMPONENT;
 
 
-
 COMPONENT top IS
-	generic ( ); 
+	generic (ResSize : positive := 32;
+			address_size_orig :positive:=12;
+			isModelSim  : boolean :=TRUE;
+			adress_size  : positive :=8
+			); 
 	PORT(  reset,ena, clock				 : IN 	STD_LOGIC; 
 		   SW   						 : IN 	STD_LOGIC_VECTOR(7 DOWNTO 0);
 		   Leds							 : OUT 	STD_LOGIC_VECTOR(7 DOWNTO 0 );
-		   Hex0,Hex1,Hex2,Hex3,Hex4,Hex5 : OUT 	STD_LOGIC_VECTOR(7 DOWNTO 0 );
+		   Hex0,Hex1,Hex2,Hex3,Hex4,Hex5 : OUT 	STD_LOGIC_VECTOR(6 DOWNTO 0 )
+		   );
 END 	COMPONENT;
 
-  
+COMPONENT GPIO IS
+generic (ResSize : positive := 32;
+			address_size_orig :positive:=12
+			); 
+PORT(  memRead,	memWrite 				 : IN 	 STD_LOGIC;
+		   Address_Bus       			 : IN 	 STD_LOGIC_VECTOR( address_size_orig-1 DOWNTO 0 );
+		   SW   			 			 : IN 	 STD_LOGIC_VECTOR(7 DOWNTO 0);
+		   Data_Bus         			 : INOUT STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
+		   Leds							 : OUT 	 STD_LOGIC_VECTOR(7 DOWNTO 0 );
+		   Hex0,Hex1,Hex2,Hex3,Hex4,Hex5 : OUT 	 STD_LOGIC_VECTOR(6 DOWNTO 0 )
+		   );
+END 	COMPONENT;
+
+COMPONENT IO_ASSIGN IS
+	PORT(  
+		   Hex_value_byte      			 : IN 	 STD_LOGIC_VECTOR(7 DOWNTO 0 );
+		   Hex							 : OUT 	 STD_LOGIC_VECTOR(6 DOWNTO 0 )
+		   );
+END COMPONENT;
+
 end aux_package;

@@ -25,9 +25,10 @@ ENTITY dmemory IS
 END dmemory;
 
 ARCHITECTURE behavior OF dmemory IS
-SIGNAL write_clock    : STD_LOGIC;
-SIGNAL w_enable       : STD_LOGIC;
-SIGNAL address_to_mem : STD_LOGIC_VECTOR(address_size-1 DOWNTO 0);
+SIGNAL write_clock    		 : STD_LOGIC;
+SIGNAL w_enable       		 : STD_LOGIC;
+SIGNAL read_data_local       : STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
+SIGNAL address_to_mem 		 : STD_LOGIC_VECTOR(address_size-1 DOWNTO 0);
 alias isGPIO  is address(address_size_orig-1);
 BEGIN
 
@@ -38,7 +39,6 @@ BEGIN
 		address_to_mem <=address(9 DOWNTO 2)&"00";
 	END generate Quartus_D;
 	
-	
 	w_enable <= '1' when (Memwrite='1' and isGPIO='0') else '0'; -- make sure isn't GPIO
 	data_memory : altsyncram
 	GENERIC MAP  (
@@ -47,7 +47,7 @@ BEGIN
 		widthad_a => address_size,
 		lpm_type => "altsyncram",
 		outdata_reg_a => "UNREGISTERED",
-		init_file => "C:\Users\orisa\source\modelSim\work\L1_Caches\testing\test7_data.hex",
+		init_file => "C:\Users\orisa\source\modelSim\work\L1_Caches\hex\data_hex1.hex",
 		intended_device_family => "Cyclone"
 	)
 	PORT MAP (
