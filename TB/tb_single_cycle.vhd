@@ -1,6 +1,7 @@
 LIBRARY IEEE;
 USE IEEE.STD_LOGIC_1164.ALL;
 USE IEEE.STD_LOGIC_ARITH.ALL;
+use ieee.std_logic_unsigned.all;
 LIBRARY work;
 USE work.aux_package.all;
 
@@ -66,12 +67,13 @@ BEGIN
 		WAIT FOR 50 ns;
      END PROCESS clk;
 	
-	switches: PROCESS
-   BEGIN
-		SW<=(others=>'0');
-        WAIT FOR 50 ns;
-		SW<=(others=>'1');
-		WAIT FOR 50 ns;
-    
-   END PROCESS switches;
+   switches : process
+        begin
+		  SW <= (others => '0');
+		  for i in 0 to 10 loop
+			wait for 500 ns;
+				SW <= SW+1;
+		  end loop;
+		  wait;
+        end process;
 END struct;

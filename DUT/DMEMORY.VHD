@@ -47,7 +47,7 @@ BEGIN
 		widthad_a => address_size,
 		lpm_type => "altsyncram",
 		outdata_reg_a => "UNREGISTERED",
-		init_file => "C:\Users\orisa\source\modelSim\work\L1_Caches\hex\data_hex1.hex",
+		init_file => "C:\Users\orisa\source\modelSim\work\L1_Caches\hex\data_hex2.hex",
 		intended_device_family => "Cyclone"
 	)
 	PORT MAP (
