@@ -12,42 +12,41 @@ USE work.aux_package.all;
 
 ENTITY  Execute IS
 --									*********Constants Delclaration**********
-generic ( AluOpSize : positive := 9;
-		add_res_size : positive := 8;
-		shamt_size: positive := 5;
-		func_op_size: positive := 6;
-		ResSize : positive := 32;
-		PC_size : positive := 10;
-		change_size: positive := 8;
-		mult_size: positive := 64	); 
+generic ( AluOpSize 	: positive := 9;
+		  shamt_size	: positive := 5;
+		  cmd_size		: positive := 5;
+		  func_op_size	: positive := 6;
+		  ResSize		: positive := 32;
+		  mult_size	 	: positive := 64	); 
 
-	PORT(	Read_data_1 	: IN 	STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
-			Read_data_2 	: IN 	STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
-			Sign_extend 	: IN 	STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
-			shamt 			: IN 	STD_LOGIC_VECTOR( shamt_size-1 DOWNTO 0 );
-			Function_opcode : IN 	STD_LOGIC_VECTOR( func_op_size-1 DOWNTO 0 );
-			ALUOp 			: IN 	STD_LOGIC_VECTOR( AluOpSize-1 DOWNTO 0 );
-			ALUSrc 			: IN 	STD_LOGIC;
-			Zero 			: OUT	STD_LOGIC;
-			ALU_Result 		: OUT	STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
-			Add_Result 		: OUT	STD_LOGIC_VECTOR( add_res_size-1 DOWNTO 0 );
-			PC_plus_4 		: IN 	STD_LOGIC_VECTOR( PC_size-1 DOWNTO 0 );
-			clock, reset	: IN 	STD_LOGIC );
+	PORT(	Read_data_1 			 : IN 	STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
+			Read_data_2 			 : IN 	STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
+			Sign_extend 		     : IN 	STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
+			ALUOp 					 : IN 	STD_LOGIC_VECTOR( AluOpSize-1 DOWNTO 0 );
+			ALUSrc 					 : IN 	STD_LOGIC;
+			clock, reset			 : IN 	STD_LOGIC;
+			Ainput_out, Binput_out 	 : OUT STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
+			Zero 					 : OUT	STD_LOGIC;
+			ALU_Result 				 : OUT	STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 )
+			 );
 END Execute;
 
 ARCHITECTURE behavior OF Execute IS
 SIGNAL Ainput, Binput 		: STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
 SIGNAL ALU_output_mux		: STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
-SIGNAL Branch_Add 			: STD_LOGIC_VECTOR( add_res_size-1 DOWNTO 0 );
 SIGNAL ALU_ctl				: STD_LOGIC_VECTOR( 3 DOWNTO 0 );
 SIGNAL zeroes				: STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
-SIGNAL shamt_int           : integer;
-
+SIGNAL shamt_int            : integer;
+SIGNAL shamt 				: STD_LOGIC_VECTOR( shamt_size-1 DOWNTO 0 );
+SIGNAL Function_opcode 		: STD_LOGIC_VECTOR( func_op_size-1 DOWNTO 0 );
 
 BEGIN
+
+---------------------------------start the Execute ------------------------------------------------------
+	shamt <= Sign_extend(10 DOWNTO 6);
+	Function_opcode <= Sign_extend(5 DOWNTO 0);
 	Ainput <= Read_data_1; --No condition is required as they are physically always connected unlike B input
 	zeroes<=(OTHERS =>'0');
-
 						-- ALU input mux
 	Binput <= Read_data_2 WHEN (ALUSrc = '0' or ALUOp(0) = '1') --Mux for Binput 
 		else  Sign_extend;
@@ -69,19 +68,14 @@ BEGIN
 			   "1111"; 
 			   
 	
-		    
-				
-						-- Adder to compute Branch Address
-	Branch_Add	<= PC_plus_4( PC_size-1 DOWNTO 2 ) +  Sign_extend( change_size-1 DOWNTO 0 ); 
-	Add_result 	<= Branch_Add( change_size-1 DOWNTO 0 );
-		
+	---------Zero signal --------------------------	    
 	Zero <= '1' when ALU_output_mux= zeroes else '0';
-
+	Ainput_out<=Ainput;
+	Binput_out<=Binput;
 PROCESS ( ALU_ctl, Ainput, Binput )
 	variable alu_tmp : STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
 	variable alu_mult : STD_LOGIC_VECTOR( mult_size-1 DOWNTO 0 );
 	BEGIN
-	
 	
 					-- Select ALU operation
  	CASE ALU_ctl IS
@@ -93,10 +87,10 @@ PROCESS ( ALU_ctl, Ainput, Binput )
 	 	WHEN "0010" 	=>	ALU_output_mux 	<= Ainput + Binput;
 						-- ALU performs ALUresult = A_input XOR B_input 
  	 	WHEN "0011" 	=>	ALU_output_mux <= Ainput xor Binput;
-						-- ALU performs ALUresult = AINPUT shifted *LEFT* by immdediate value (Binput)
- 	 	WHEN "0100" 	=>ALU_output_mux 	<= Binput(ResSize-1-shamt_int DOWNTO 0 )& zeroes(shamt_int-1 DOWNTO 0);
-						-- ALU performs ALUresult = AINPUT shifted *RIGHT* by immdediate value(Binput)
- 	 	WHEN "0101" 	=>ALU_output_mux 	<= zeroes(shamt_int-1 DOWNTO 0) & Binput(ResSize-1 downto shamt_int);
+						-- ALU performs ALUresult = Binput shifted *LEFT* by immdediate value (shamt)
+ 	 	WHEN "0100" 	=> ALU_output_mux 	<= shl(Binput,shamt);
+						-- ALU performs ALUresult = BINPUT shifted *RIGHT* by immdediate value(Binput)
+ 	 	WHEN "0101" 	=> ALU_output_mux 	<= shr(Binput,shamt);
 						-- ALU performs ALUresult = A_input -B_input
  	 	WHEN "0110" 	=>	ALU_output_mux 	<= Ainput - Binput;
 						-- ALU performs SLT
@@ -105,7 +99,7 @@ PROCESS ( ALU_ctl, Ainput, Binput )
 			ALU_output_mux <= X"0000000"&B"000"&alu_tmp(ResSize-1);
 		WHEN "1000"    => 
 				alu_mult :=Ainput * Binput ; -- mult
-				ALU_output_mux <= alu_mult(ResSize-1 DOWNTO 0);
+				ALU_output_mux <= alu_mult(ResSize-1 DOWNTO 0); -- put only lsb 
 		
 		WHEN "1001" => ALU_output_mux <= Binput(15 DOWNTO 0)&X"0000";
 		
@@ -114,5 +108,7 @@ PROCESS ( ALU_ctl, Ainput, Binput )
 			-- Select ALU output        
   END PROCESS;
   ALU_result <= ALU_output_mux;
+  
+
 END behavior;
 
