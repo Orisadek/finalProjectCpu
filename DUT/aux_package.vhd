@@ -144,7 +144,8 @@ COMPONENT top IS
 	PORT(  reset,ena, clock				 : IN 	STD_LOGIC; 
 		   SW   						 : IN 	STD_LOGIC_VECTOR(7 DOWNTO 0);
 		   Leds							 : OUT 	STD_LOGIC_VECTOR(7 DOWNTO 0 );
-		   Hex0,Hex1,Hex2,Hex3,Hex4,Hex5 : OUT 	STD_LOGIC_VECTOR(6 DOWNTO 0 )
+		   Hex0,Hex1,Hex2,Hex3,Hex4,Hex5 : OUT 	STD_LOGIC_VECTOR(6 DOWNTO 0 );
+		   OUT_signal                  	 : OUT 	STD_LOGIC
 		   );
 END 	COMPONENT;
 
@@ -152,12 +153,15 @@ COMPONENT GPIO IS
 generic (ResSize : positive := 32;
 			address_size_orig :positive:=12
 			); 
-PORT(  memRead,	memWrite 				 : IN 	 STD_LOGIC;
+PORT(  clock,reset       		    	 : IN 	 STD_LOGIC;
+		   memRead,	memWrite 			 : IN 	 STD_LOGIC;
 		   Address_Bus       			 : IN 	 STD_LOGIC_VECTOR( address_size_orig-1 DOWNTO 0 );
 		   SW   			 			 : IN 	 STD_LOGIC_VECTOR(7 DOWNTO 0);
 		   Data_Bus         			 : INOUT STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
 		   Leds							 : OUT 	 STD_LOGIC_VECTOR(7 DOWNTO 0 );
-		   Hex0,Hex1,Hex2,Hex3,Hex4,Hex5 : OUT 	 STD_LOGIC_VECTOR(6 DOWNTO 0 )
+		   Hex0,Hex1,Hex2,Hex3,Hex4,Hex5 : OUT 	 STD_LOGIC_VECTOR(6 DOWNTO 0 );
+		   OUT_signal       			 : OUT 	 STD_LOGIC;
+		   set_TBIFG					 : OUT 	 STD_LOGIC
 		   );
 END 	COMPONENT;
 
@@ -167,5 +171,19 @@ COMPONENT IO_ASSIGN IS
 		   Hex							 : OUT 	 STD_LOGIC_VECTOR(6 DOWNTO 0 )
 		   );
 END COMPONENT;
+
+ENTITY BasicTimer IS
+	PORT(	BTCCR1,BTCCR0 			: IN	STD_LOGIC_VECTOR( 31 DOWNTO 0 );
+			BTCNT_In 				: IN	STD_LOGIC_VECTOR( 31 DOWNTO 0 );
+			BTCTL 					: IN	STD_LOGIC_VECTOR( 7 DOWNTO 0 );
+			clock 					: IN	STD_LOGIC;
+			en_BTCNT 				: IN	STD_LOGIC;
+			OUT_signal 				: OUT	STD_LOGIC;
+			set_TBIFG 				: OUT	STD_LOGIC;
+			BTCTL_out 				: OUT	STD_LOGIC_VECTOR( 7 DOWNTO 0 );
+			BTCCR1_out,BTCCR0_out 	: OUT	STD_LOGIC_VECTOR( 7 DOWNTO 0 );
+			BTCNT_Out 				: OUT	STD_LOGIC_VECTOR( 7 DOWNTO 0 );
+			);
+END 	BasicTimer;
 
 end aux_package;
