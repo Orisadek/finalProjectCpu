@@ -172,18 +172,16 @@ COMPONENT IO_ASSIGN IS
 		   );
 END COMPONENT;
 
-ENTITY BasicTimer IS
+COMPONENT BasicTimer IS
 	PORT(	BTCCR1,BTCCR0 			: IN	STD_LOGIC_VECTOR( 31 DOWNTO 0 );
 			BTCNT_In 				: IN	STD_LOGIC_VECTOR( 31 DOWNTO 0 );
 			BTCTL 					: IN	STD_LOGIC_VECTOR( 7 DOWNTO 0 );
-			clock 					: IN	STD_LOGIC;
+			clock,reset 			: IN	STD_LOGIC;
 			en_BTCNT 				: IN	STD_LOGIC;
 			OUT_signal 				: OUT	STD_LOGIC;
 			set_TBIFG 				: OUT	STD_LOGIC;
-			BTCTL_out 				: OUT	STD_LOGIC_VECTOR( 7 DOWNTO 0 );
-			BTCCR1_out,BTCCR0_out 	: OUT	STD_LOGIC_VECTOR( 7 DOWNTO 0 );
-			BTCNT_Out 				: OUT	STD_LOGIC_VECTOR( 7 DOWNTO 0 );
+			BTCNT_Out 				: OUT	STD_LOGIC_VECTOR( 7 DOWNTO 0 )
 			);
-END 	BasicTimer;
+END 	COMPONENT;
 
 end aux_package;

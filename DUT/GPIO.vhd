@@ -23,7 +23,7 @@ ENTITY GPIO IS
 END 	GPIO;
 
 ARCHITECTURE behavior OF GPIO IS
-signal CS1,CS2,CS3,CS4,CS5,CS6,CS7,C8,C9 						   : STD_LOGIC;
+signal CS1,CS2,CS3,CS4,CS5,CS6,CS7,CS8,CS9 						   : STD_LOGIC;
 signal Leds_interface,Hex0_interface,Hex1_interface				   :STD_LOGIC_VECTOR(7 DOWNTO 0);
 signal Hex2_interface,Hex3_interface,Hex4_interface,Hex5_interface :STD_LOGIC_VECTOR(7 DOWNTO 0);
 -------------------------------------------------Basic timer-------------------------------------
@@ -114,17 +114,17 @@ BEGIN
 	-------------------------------------Basic Timer ---------------------------------------------------------------
 	BTCTL	 <= Data_Bus(7 DOWNTO 0) when(CS6='1' and memWrite='1' and reset='0') else
 				unaffected when reset='0' else
-				others=>'0'; --- change to original option (hold = 1)
+				(5=>'1',others=>'0'); 
 				
 	BTCNT_In <= Data_Bus when(CS7='1' and memWrite='1') else unaffected;
 	
 	BTCCR0	 <= Data_Bus when(CS8='1' and memWrite='1') else 
 				unaffected when reset='0' else
-				others=>'0';
+				(others=>'0');
 				
 	BTCCR1	 <= Data_Bus when(CS9='1' and memWrite='1') else 
 				unaffected when reset='0' else
-				others=>'0';
+				(others=>'0');
 	
 	
 	Data_Bus <=X"000000"&BTCTL  when (CS6='1' and memRead='1') else (others=>'Z');
@@ -138,6 +138,7 @@ BEGIN
 			BTCNT_In 			    => BTCNT_In,
 			BTCTL 					=> BTCTL,
 			clock 					=> clock,
+			reset                   => reset,
 			en_BTCNT 				=> CS7,
 			OUT_signal 				=> OUT_signal,
 			set_TBIFG 				=> set_TBIFG,
