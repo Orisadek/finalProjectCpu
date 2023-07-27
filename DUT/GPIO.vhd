@@ -31,6 +31,8 @@ signal 			BTCCR1,BTCCR0 			: STD_LOGIC_VECTOR( 31 DOWNTO 0 );
 signal			BTCNT_In 				: STD_LOGIC_VECTOR( 31 DOWNTO 0 );
 signal			BTCTL 					: STD_LOGIC_VECTOR( 7 DOWNTO 0 );
 signal			BTCNT_Out 				: STD_LOGIC_VECTOR( 31 DOWNTO 0 );
+signal			BTCTL_latch 					: STD_LOGIC_VECTOR( 7 DOWNTO 0 );
+
 -----------------------------------------------------------------------------------
 alias A11 is Address_Bus(11);
 alias A5  is Address_Bus(5);
@@ -112,17 +114,14 @@ BEGIN
 	Data_Bus <=X"000000"&SW when (CS5='1' and memRead='1') else (others=>'Z');
 	
 	-------------------------------------Basic Timer ---------------------------------------------------------------
-	BTCTL	 <= Data_Bus(7 DOWNTO 0) when(CS6='1' and memWrite='1' and reset='0') else
-				unaffected when reset='0' else
-				(5=>'1',others=>'0'); 
-				
+		
 	BTCNT_In <= Data_Bus when(CS7='1' and memWrite='1') else unaffected;
 	
-	BTCCR0	 <= Data_Bus when(CS8='1' and memWrite='1') else 
+	BTCCR0	 <= Data_Bus when(CS8='1' and memWrite='1' and reset='0') else 
 				unaffected when reset='0' else
 				(others=>'0');
 				
-	BTCCR1	 <= Data_Bus when(CS9='1' and memWrite='1') else 
+	BTCCR1	 <= Data_Bus when(CS9='1' and memWrite='1' and reset='0') else 
 				unaffected when reset='0' else
 				(others=>'0');
 	
@@ -145,6 +144,17 @@ BEGIN
 			BTCNT_Out 				=> BTCNT_Out
 			);
 			
+
+gpio_proc:process(clock)
+		BEGIN
+			IF (reset = '1')THEN
+				BTCTL <=(5=>'1',others=>'0');
+			elsif (clock'EVENT  AND clock = '1' and CS6='1' and memWrite='1')THEN
+				BTCTL <= Data_Bus(7 DOWNTO 0);
+			else 
+				null;
+			END IF;
+		END process;
 	
 	
 END behavior;

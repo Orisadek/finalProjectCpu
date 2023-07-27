@@ -49,7 +49,7 @@ flag<= BTCCR1-BTCNT;
 --BTCTL_out<=BTCTL;
 --BTCCR1_out<=BTCCR1_Latch;
 --BTCCR0_out<=BTCCR0_Latch;
-BTCNT_Out<=BTCNT;
+
 
 OUT_signal<='1' when (flag(31)='0' and BTOUTEN='1') else
 			'0';
@@ -72,8 +72,10 @@ timer_proc:process(clock,BTSSEL,en_BTCNT)
 			IF (reset = '1')THEN
 				count:=0;
 				BTCNT<=(others=>'0');
-			elsif(en_BTCNT='1') THEN
+				BTCNT_Out<=BTCNT;
+			elsif(en_BTCNT='1' and clock'EVENT  AND clock = '1') THEN
 				BTCNT<=BTCNT_In;
+				BTCNT_Out<=BTCNT;
 			elsif (clock'EVENT  AND clock = '1' and  BTHOLD='0')THEN
 				count:=count+1;
 				if((BTSSEL="01" and count=2) or (BTSSEL="10" and count=4) or (BTSSEL="11" and count=8) or BTSSEL="00") THEN
@@ -82,6 +84,7 @@ timer_proc:process(clock,BTSSEL,en_BTCNT)
 					else
 						BTCNT<=BTCNT+1;
 					end if;
+					BTCNT_Out<=BTCNT;
 					count:=0;
 				END IF;
 			END IF;
