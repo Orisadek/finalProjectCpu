@@ -31,9 +31,9 @@
 #---------------------- Data Segment --------------------------
 .data 
 	IV: 	.word main            # Start of Interrupt Vector Table
-		.word UartRX_ISR
-		.word UartRX_ISR
-		.word UartTX_ISR
+		
+		#.word UartRX_ISR
+		#.word UartTX_ISR
 	        .word BT_ISR
 		.word KEY1_ISR
 		.word KEY2_ISR

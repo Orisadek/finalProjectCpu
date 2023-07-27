@@ -94,19 +94,18 @@ COMPONENT  Execute
 		PC_size : positive := 10;
 		change_size: positive := 8;
 		mult_size: positive := 64	); 
-   	     PORT(	Read_data_1 		: IN 	STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
-                Read_data_2 		: IN 	STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
-               	Sign_Extend 		: IN 	STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
-				shamt 			    : IN 	STD_LOGIC_VECTOR( shamt_size-1 DOWNTO 0 );
-               	Function_opcode		: IN 	STD_LOGIC_VECTOR( 5 DOWNTO 0 );
-               	ALUOp 				: IN 	STD_LOGIC_VECTOR( AluOpSize-1 DOWNTO 0 );
-               	ALUSrc 				: IN 	STD_LOGIC;
-				PC_plus_4 			: IN 	STD_LOGIC_VECTOR( PC_size-1 DOWNTO 0 );
-               	clock, reset		: IN 	STD_LOGIC;
-               	Zero 				: OUT	STD_LOGIC;
-               	ALU_Result 			: OUT	STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
-               	Add_Result 			: OUT	STD_LOGIC_VECTOR( change_size-1 DOWNTO 0 )
-				);
+   	    PORT(	Read_data_1 	: IN 	STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
+			Read_data_2 	: IN 	STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
+			Sign_extend 	: IN 	STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
+			shamt 			: IN 	STD_LOGIC_VECTOR( shamt_size-1 DOWNTO 0 );
+			Function_opcode : IN 	STD_LOGIC_VECTOR( func_op_size-1 DOWNTO 0 );
+			ALUOp 			: IN 	STD_LOGIC_VECTOR( AluOpSize-1 DOWNTO 0 );
+			ALUSrc 			: IN 	STD_LOGIC;
+			Zero 			: OUT	STD_LOGIC;
+			ALU_Result 		: OUT	STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
+			Add_Result 		: OUT	STD_LOGIC_VECTOR( add_res_size-1 DOWNTO 0 );
+			PC_plus_4 		: IN 	STD_LOGIC_VECTOR( PC_size-1 DOWNTO 0 );
+			clock, reset	: IN 	STD_LOGIC );
 END COMPONENT;
 
 COMPONENT dmemory
@@ -180,7 +179,7 @@ COMPONENT BasicTimer IS
 			en_BTCNT 				: IN	STD_LOGIC;
 			OUT_signal 				: OUT	STD_LOGIC;
 			set_TBIFG 				: OUT	STD_LOGIC;
-			BTCNT_Out 				: OUT	STD_LOGIC_VECTOR( 7 DOWNTO 0 )
+			BTCNT_Out 				: OUT	STD_LOGIC_VECTOR( 31 DOWNTO 0 )
 			);
 END 	COMPONENT;
 
