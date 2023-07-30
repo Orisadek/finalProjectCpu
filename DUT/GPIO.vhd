@@ -115,15 +115,7 @@ BEGIN
 	
 	-------------------------------------Basic Timer ---------------------------------------------------------------
 		
-	BTCNT_In <= Data_Bus when(CS7='1' and memWrite='1') else unaffected;
 	
-	BTCCR0	 <= Data_Bus when(CS8='1' and memWrite='1' and reset='0') else 
-				unaffected when reset='0' else
-				(others=>'0');
-				
-	BTCCR1	 <= Data_Bus when(CS9='1' and memWrite='1' and reset='0') else 
-				unaffected when reset='0' else
-				(others=>'0');
 	
 	
 	Data_Bus <=X"000000"&BTCTL  when (CS6='1' and memRead='1') else (others=>'Z');
@@ -149,8 +141,17 @@ gpio_proc:process(clock)
 		BEGIN
 			IF (reset = '1')THEN
 				BTCTL <=(5=>'1',others=>'0');
+				BTCNT_In<=(others=>'0');
+				BTCCR0 <=(others=>'0');
+				BTCCR1 <= (others=>'0');
 			elsif (clock'EVENT  AND clock = '1' and CS6='1' and memWrite='1')THEN
 				BTCTL <= Data_Bus(7 DOWNTO 0);
+			elsif (clock'EVENT  AND clock = '1' and CS7='1' and memWrite='1')THEN
+				BTCNT_In <= Data_Bus ;
+			elsif (clock'EVENT  AND clock = '1' and CS8='1' and memWrite='1')THEN
+				BTCCR0	 <= Data_Bus;
+			elsif (clock'EVENT  AND clock = '1' and CS9='1' and memWrite='1')THEN
+				BTCCR1	 <= Data_Bus; 
 			else 
 				null;
 			END IF;
