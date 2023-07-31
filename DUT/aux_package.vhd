@@ -156,6 +156,7 @@ PORT(  clock,reset       		    	 : IN 	 STD_LOGIC;
 		   memRead,	memWrite 			 : IN 	 STD_LOGIC;
 		   Address_Bus       			 : IN 	 STD_LOGIC_VECTOR( address_size_orig-1 DOWNTO 0 );
 		   SW   			 			 : IN 	 STD_LOGIC_VECTOR(7 DOWNTO 0);
+		   CS1,CS2,CS3,CS4,CS5,CS6,CS7,CS8,CS9 : IN 	 STD_LOGIC;
 		   Data_Bus         			 : INOUT STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
 		   Leds							 : OUT 	 STD_LOGIC_VECTOR(7 DOWNTO 0 );
 		   Hex0,Hex1,Hex2,Hex3,Hex4,Hex5 : OUT 	 STD_LOGIC_VECTOR(6 DOWNTO 0 );

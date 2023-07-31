@@ -20,7 +20,7 @@ ENTITY BasicTimer IS
 END 	BasicTimer;
 
 ARCHITECTURE behavior OF BasicTimer IS
-signal BTCCR0_Latch,BTCCR1_Latch	: STD_LOGIC_VECTOR( 31 DOWNTO 0 );
+--signal BTCCR0_Latch,BTCCR1_Latch	: STD_LOGIC_VECTOR( 31 DOWNTO 0 );
 signal BTCNT 						: STD_LOGIC_VECTOR( 31 DOWNTO 0 );
 signal flag 						: STD_LOGIC_VECTOR( 31 DOWNTO 0 );
 
@@ -41,8 +41,8 @@ alias Q25 is BTCNT(25);
 
 BEGIN
 
-BTCCR0_Latch<=BTCCR0;
-BTCCR1_Latch<=BTCCR1;
+--BTCCR0_Latch<=BTCCR0;
+--BTCCR1_Latch<=BTCCR1;
 
 flag<= BTCCR1-BTCNT;
 

@@ -17,14 +17,17 @@
 .data 
 	N: .word 0xB71B00 
 .text
-
-	sw   $0,0x800 # write to PORT_LEDR[7-0]
-	sw   $0,0x804 # write to PORT_HEX0[7-0]
-	sw   $0,0x805 # write to PORT_HEX1[7-0]
-	sw   $0,0x808 # write to PORT_HEX2[7-0]
-	sw   $0,0x809 # write to PORT_HEX3[7-0]
-	sw   $0,0x80C # write to PORT_HEX4[7-0]
-	sw   $0,0x80D # write to PORT_HEX5[7-0]
+	addi $t0,$0,1
+	addi $t1,$0,2
+	addi $t2,$0,3
+	addi $t3,$0,4
+	sw   $t0,0x800 # write to PORT_LEDR[7-0]
+	sw   $t1,0x804 # write to PORT_HEX0[7-0]
+	sw   $t2,0x805 # write to PORT_HEX1[7-0]
+	sw   $t3,0x808 # write to PORT_HEX2[7-0]
+	sw   $t0,0x809 # write to PORT_HEX3[7-0]
+	sw   $t1,0x80C # write to PORT_HEX4[7-0]
+	sw   $t2,0x80D # write to PORT_HEX5[7-0]
 	#--------------------------------------------------
 	lw   $t3,N
 	move $t0,$zero  # $t0=0
