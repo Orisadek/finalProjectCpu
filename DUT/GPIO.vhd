@@ -44,10 +44,6 @@ alias A0  is Address_Bus(0);
 
 BEGIN
 
-	
-
-	
-	-----------------------------------Leds -------------------------------------------------------------------
 	gpio_insert_proc:process(reset,clock)
 	BEGIN
 	IF (reset = '1')THEN
@@ -77,6 +73,7 @@ BEGIN
 	END IF;
 	END process;
 	
+	-----------------------------------Leds -------------------------------------------------------------------
 	--Leds_interface<=Data_Bus(7 DOWNTO 0 ) when (CS1='1' and memWrite='1') else unaffected;  
 	Leds<=Leds_interface;
 	Data_Bus <=X"000000"&Leds_interface when (CS1='1' and memRead='1') else (others=>'Z');

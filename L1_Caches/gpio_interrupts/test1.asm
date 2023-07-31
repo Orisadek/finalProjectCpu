@@ -66,7 +66,17 @@ exit:	lw   $ra,0($sp)
 calc:	addi $v0,$t0,-4	
 	jr   $ra	       # ret	
 	
-	
 
+UartRX_ISR:nop
+
+UartTX_ISR:nop
+
+BT_ISR: nop
+
+KEY1_ISR: nop
+
+KEY2_ISR:nop
+
+KEY3_ISR:nop
        
          

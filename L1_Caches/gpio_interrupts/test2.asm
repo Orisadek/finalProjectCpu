@@ -31,14 +31,15 @@
 #---------------------- Data Segment --------------------------
 .data 
 	IV: 	.word main            # Start of Interrupt Vector Table
-		
-		#.word UartRX_ISR
-		#.word UartTX_ISR
+		.word UartRX_ISR
+		.word UartRX_ISR
+		.word UartTX_ISR
 	        .word BT_ISR
 		.word KEY1_ISR
 		.word KEY2_ISR
 		.word KEY3_ISR
-
+	
+	
 	N:	.word 0xB71B00
 	
 #---------------------- Code Segment --------------------------	
@@ -89,3 +90,8 @@ BT_ISR:	addi $t0,$t0,1  # $t1=$t1+1
 	sw   $t0,0x800 # write to PORT_LEDR[7-0]
         jr   $k1        # reti
          
+
+UartRX_ISR:nop
+
+UartTX_ISR:nop
+

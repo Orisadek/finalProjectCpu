@@ -89,3 +89,6 @@ BT_ISR:	addi $t3,$t3,1  # $t3=$t3+1
 	sw   $t3,0x800 # write to PORT_LEDR[7-0]
         jr   $k1        # reti
          
+UartRX_ISR:nop
+
+UartTX_ISR:nop
