@@ -177,7 +177,7 @@ COMPONENT BasicTimer IS
 			BTCNT_In 				: IN	STD_LOGIC_VECTOR( 31 DOWNTO 0 );
 			BTCTL 					: IN	STD_LOGIC_VECTOR( 7 DOWNTO 0 );
 			clock,reset 			: IN	STD_LOGIC;
-			en_BTCNT 				: IN	STD_LOGIC;
+			CS7		 				: IN	STD_LOGIC;
 			OUT_signal 				: OUT	STD_LOGIC;
 			set_TBIFG 				: OUT	STD_LOGIC;
 			BTCNT_Out 				: OUT	STD_LOGIC_VECTOR( 31 DOWNTO 0 )

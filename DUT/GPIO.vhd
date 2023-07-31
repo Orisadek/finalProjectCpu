@@ -34,12 +34,8 @@ signal			BTCTL 					: STD_LOGIC_VECTOR( 7 DOWNTO 0 );
 signal			BTCNT_Out 				: STD_LOGIC_VECTOR( 31 DOWNTO 0 );
 
 -----------------------------------------------------------------------------------
-alias A11 is Address_Bus(11);
-alias A5  is Address_Bus(5);
-alias A4  is Address_Bus(4);
-alias A3  is Address_Bus(3);
-alias A2  is Address_Bus(2);
---alias A1  is Address_Bus(1);
+
+
 alias A0  is Address_Bus(0);
 
 BEGIN
@@ -76,60 +72,55 @@ BEGIN
 	-----------------------------------Leds -------------------------------------------------------------------
 	--Leds_interface<=Data_Bus(7 DOWNTO 0 ) when (CS1='1' and memWrite='1') else unaffected;  
 	Leds<=Leds_interface;
-	Data_Bus <=X"000000"&Leds_interface when (CS1='1' and memRead='1') else (others=>'Z');
-	---- check if okay later
+	--Data_Bus <=X"000000"&Leds_interface when (CS1='1' and memRead='1') else (others=>'Z');	
 	-----------------------------------Hex0 -------------------------------------------------------------------
 	--Hex0_interface<=Data_Bus(7 DOWNTO 0 ) when (CS2='1' and memWrite='1' and A0='0' ) else unaffected;  
 	Hex0_portmap:IO_ASSIGN PORT MAP (	
 				Hex_value_byte => Hex0_interface,     
 				Hex		       => Hex0				
 				);
-	Data_Bus <=X"000000"&Hex0_interface when (CS2='1' and memRead='1' and A0='0') else (others=>'Z');
-	---- check if okay later
+	--Data_Bus <=X"000000"&Hex0_interface when (CS2='1' and memRead='1' and A0='0') else (others=>'Z');
 	-----------------------------------Hex1 -------------------------------------------------------------------
 	--Hex1_interface<=Data_Bus(7 DOWNTO 0 ) when (CS2='1' and memWrite='1' and A0='1' ) else unaffected;  
 	Hex1_portmap:IO_ASSIGN PORT MAP (	
 				Hex_value_byte => Hex1_interface,     
 				Hex		       => Hex1				
 				);
-	Data_Bus<=X"000000"&Hex1_interface when (CS2='1' and memRead='1' and A0='1') else (others=>'Z');
-	---- check if okay later
-	
+	--Data_Bus<=X"000000"&Hex1_interface when (CS2='1' and memRead='1' and A0='1') else (others=>'Z');
 	-----------------------------------Hex2 -------------------------------------------------------------------
 	--Hex2_interface<=Data_Bus(7 DOWNTO 0 ) when (CS3='1' and memWrite='1' and A0='0' ) else unaffected;  
 	Hex2_portmap:IO_ASSIGN PORT MAP (	
 				Hex_value_byte => Hex2_interface,     
 				Hex		       => Hex2				
 				);
-	Data_Bus <=X"000000"&Hex2_interface when (CS3='1' and memRead='1' and A0='0') else (others=>'Z');
-	---- check if okay later
+	--Data_Bus <=X"000000"&Hex2_interface when (CS3='1' and memRead='1' and A0='0') else (others=>'Z');
+	
 	-----------------------------------Hex3-------------------------------------------------------------------
 	--Hex3_interface<=Data_Bus(7 DOWNTO 0 ) when (CS3='1' and memWrite='1' and A0='1' ) else unaffected;  
 	Hex3_portmap:IO_ASSIGN PORT MAP (	
 				Hex_value_byte => Hex3_interface,     
 				Hex		       => Hex3				
 				);
-	Data_Bus <=X"000000"&Hex3_interface when (CS3='1' and memRead='1' and A0='1') else (others=>'Z');
-	---- check if okay later
+	--Data_Bus <=X"000000"&Hex3_interface when (CS3='1' and memRead='1' and A0='1') else (others=>'Z');
+	
 	-----------------------------------Hex4-------------------------------------------------------------------
 	--Hex4_interface<=Data_Bus(7 DOWNTO 0 ) when (CS4='1' and memWrite='1' and A0='0' ) else unaffected;  
 	Hex4_portmap: IO_ASSIGN PORT MAP (	
 				Hex_value_byte => Hex4_interface,     
 				Hex		       => Hex4				
 				);
-	Data_Bus <=X"000000"&Hex4_interface when (CS4='1' and memRead='1' and A0='0') else (others=>'Z');
-	---- check if okay later
+	--Data_Bus <=X"000000"&Hex4_interface when (CS4='1' and memRead='1' and A0='0') else (others=>'Z');
+	
 	-----------------------------------Hex5-------------------------------------------------------------------
 	--Hex5_interface<=Data_Bus(7 DOWNTO 0 ) when (CS4='1' and memWrite='1' and A0='1' ) else unaffected;  
 	Hex5_portmap: IO_ASSIGN PORT MAP (	
 				Hex_value_byte => Hex5_interface,     
 				Hex		       => Hex5				
 				);
-	Data_Bus <=X"000000"&Hex5_interface when (CS4='1' and memRead='1' and A0='1') else (others=>'Z');
-	---- check if okay later
+	--Data_Bus <=X"000000"&Hex5_interface when (CS4='1' and memRead='1' and A0='1') else (others=>'Z');
+	
 	--------------------------------------SW -------------------------------------------------------------------
 	Data_Bus <=X"000000"&SW when (CS5='1' and memRead='1') else (others=>'Z');
-	
 	-------------------------------------Basic Timer ---------------------------------------------------------------
 		
 	Data_Bus <=X"000000"&BTCTL  when (CS6='1' and memRead='1') else (others=>'Z');
@@ -144,7 +135,7 @@ BEGIN
 			BTCTL 					=> BTCTL,
 			clock 					=> clock,
 			reset                   => reset,
-			en_BTCNT 				=> CS7,
+			CS7		 				=> CS7,
 			OUT_signal 				=> OUT_signal,
 			set_TBIFG 				=> set_TBIFG,
 			BTCNT_Out 				=> BTCNT_Out

@@ -16,7 +16,7 @@
 #--------------------------------------------------------------
 #define PORT_KEY[3-1]  0x814 - LSB nibble (3 push-buttons - Input Mode)
 #--------------------------------------------------------------
-#define UTCL           0x818 - Byte 
+#define UCTL           0x818 - Byte 
 #define RXBF           0x819 - Byte 
 #define TXBF           0x81A - Byte
 #--------------------------------------------------------------
@@ -38,7 +38,8 @@
 		.word KEY1_ISR
 		.word KEY2_ISR
 		.word KEY3_ISR
-
+	
+	
 	N:	.word 0xB71B00
 	
 #---------------------- Code Segment --------------------------	
@@ -46,19 +47,18 @@
 main:	addi $sp,$zero,0x800 # $sp=0x800
 	addi $t0,$zero,0x3F  
 	sw   $t0,0x81C       # BTCTL=0x3F(BTIP=7, BTSSEL=3, BTHOLD=1)
-	sw   $0,0x828        # BTCNT=0
+	sw   $0,0x820        # BTCNT=0
 	sw   $0,0x82C        # IE=0
 	sw   $0,0x82D        # IFG=0
 	addi $t0,$zero,0x1F  
 	sw   $t0,0x81C       # BTCTL=0x1F(BTIP=7, BTSSEL=3, BTHOLD=0)
-	addi $t0,$zero,0x09
-	sw   $t0,0x818       # UTCL=0x09 (SWRST=1,115200 BR)
-	lw   $t0,0x810       # read the state of PORT_SW[7-0]
-	
-	addi $t0,$zero,0x39  # BTIE,TXIE are disabled
-	sw   $t0,0x82C       # IE=0x39
+	addi $t0,$zero,0x1C 
+	sw   $t0,0x824       # BTIP=7, BTSSEL=3, BTHOLD=0
+	addi $t0,$zero,0x3C 
+	sw   $t0,0x82C       # IE=0x3C
 	ori  $k0,$k0,0x01    # EINT, $k0[0]=1 uses as GIE
 	
+	lw   $t0,0x810       # read the state of PORT_SW[7-0]
 L:	j    L		    # infinite loop
 	
 KEY1_ISR:
@@ -88,14 +88,12 @@ KEY3_ISR:
 	sw   $t1,0x82D  # clr KEY3IFG
 	jr   $k1        # reti
 		
-BT_ISR:	addi $t0,$t0,1  # $t0=$t0+1
+BT_ISR:	addi $t0,$t0,1  # $t1=$t1+1
 	sw   $t0,0x800 # write to PORT_LEDR[7-0]
         jr   $k1        # reti
-        
-UartRX_ISR:	
-	lw   $t1,0x819  # read RXBUF
-	sw   $t0,0x800 # write to PORT_LEDR[7-0]
-	sw   $t1,0x81A  # write to TXBUF - Echo operation
-        jr   $k1        # reti        
-  
+         
+
+UartRX_ISR:nop
+
 UartTX_ISR:nop
+
