@@ -2,4 +2,5 @@ _info
 *.qdb   
 *.qpg
 *.qtl
+*.bak
 _vmake

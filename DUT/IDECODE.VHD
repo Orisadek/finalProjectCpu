@@ -17,17 +17,20 @@ generic ( AluOpSize : positive := 9;
 		Imm_val_I: positive  :=16;
 		Imm_val_J: positive  :=26
 			);
-	  PORT(	read_data_1	: OUT 	STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
-			read_data_2	: OUT 	STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
+	  PORT(	
 			Instruction : IN 	STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
 			read_data 	: IN 	STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );   
 			ALU_result	: IN 	STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
 			RegWrite 	: IN 	STD_LOGIC;
 			MemtoReg 	: IN 	STD_LOGIC_VECTOR( 1 DOWNTO 0 );
 			RegDst 		: IN 	STD_LOGIC_VECTOR( 1 DOWNTO 0 );
-			Sign_extend : OUT 	STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
 			PC_plus_4   : IN    STD_LOGIC_VECTOR( PC_size-1 DOWNTO 0 ); 
-			clock,reset	: IN 	STD_LOGIC );
+			clock,reset	: IN 	STD_LOGIC
+			Sign_extend : OUT 	STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
+			read_data_1	: OUT 	STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
+			read_data_2	: OUT 	STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
+			GIE  		: OUT 	STD_LOGIC;
+		 );
 END Idecode;
 
 
@@ -45,6 +48,8 @@ TYPE register_file IS ARRAY ( 0 TO ResSize-1 ) OF STD_LOGIC_VECTOR( ResSize-1 DO
 	SIGNAL Instruction_immediate_value_J	: STD_LOGIC_VECTOR( Imm_val_J-1 DOWNTO 0 );
 	SIGNAL zeroes				: STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
 	SIGNAL J				: STD_LOGIC;
+	
+	alias K0 is 26;
 	
 BEGIN
 	read_register_1_address 	<= Instruction( 25 DOWNTO 21 );
@@ -99,7 +104,8 @@ PROCESS
   		ELSIF RegWrite = '1' AND write_register_address /= 0 THEN
 		      register_array(CONV_INTEGER(write_register_address)) <= write_data;
 		END IF;
-	END PROCESS;
+END PROCESS;
+	GIE <= register_array(K0)(0);
 END behavior;
 
 

@@ -17,8 +17,11 @@ COMPONENT MIPS IS
 			  address_size_orig :positive:=12
 			); 
 	PORT( reset,ena, clock		: IN 	STD_LOGIC; 
+		INTR			 	 	: IN	STD_LOGIC;
 		Memwrite_out,MemRead_out: OUT 	STD_LOGIC ;
 		Address_Bus   			: OUT 	STD_LOGIC_VECTOR( address_size_orig-1 DOWNTO 0 );
+		INTA					: OUT	STD_LOGIC;
+		GIE 				    : OUT	 STD_LOGIC;
 		Data_Bus   			    : INOUT STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 )
 		);
 END 	COMPONENT;
@@ -55,34 +58,39 @@ COMPONENT Idecode
 		Imm_val_I: positive  :=16;
 		Imm_val_J: positive  :=26
 			);
- 	     PORT(	read_data_1 		: OUT 	STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
-        		read_data_2 		: OUT 	STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
-        		Instruction 		: IN 	STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
-        		read_data 			: IN 	STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
-        		ALU_result 			: IN 	STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
-        		RegWrite			: IN 	STD_LOGIC;
-				MemtoReg 			: IN 	STD_LOGIC_VECTOR( 1 DOWNTO 0 );
-        		RegDst 				: IN 	STD_LOGIC_VECTOR( 1 DOWNTO 0 );
-        		Sign_extend 		: OUT 	STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
-				PC_plus_4   		: IN    STD_LOGIC_VECTOR( PC_size-1 DOWNTO 0 ); --- change if needed
-        		clock, reset		: IN 	STD_LOGIC );
+ 	  	  PORT(	
+			Instruction : IN 	STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
+			read_data 	: IN 	STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );   
+			ALU_result	: IN 	STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
+			RegWrite 	: IN 	STD_LOGIC;
+			MemtoReg 	: IN 	STD_LOGIC_VECTOR( 1 DOWNTO 0 );
+			RegDst 		: IN 	STD_LOGIC_VECTOR( 1 DOWNTO 0 );
+			PC_plus_4   : IN    STD_LOGIC_VECTOR( PC_size-1 DOWNTO 0 ); 
+			clock,reset	: IN 	STD_LOGIC
+			Sign_extend : OUT 	STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
+			read_data_1	: OUT 	STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
+			read_data_2	: OUT 	STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
+			GIE  		: OUT 	STD_LOGIC;
+		 );
 END COMPONENT;
 
 COMPONENT control
 generic ( AluOpSize : positive := 9 ;
 		  cmd_size    : positive := 6 ); 
-	     PORT( 	Opcode 				: IN 	STD_LOGIC_VECTOR( 5 DOWNTO 0 );
-				func_op     	    : IN 	STD_LOGIC_VECTOR( 5 DOWNTO 0 );
-             	RegDst 				: OUT 	STD_LOGIC_VECTOR( 1 DOWNTO 0 );
-             	ALUSrc 				: OUT 	STD_LOGIC;
-             	MemtoReg 			: OUT 	STD_LOGIC_VECTOR( 1 DOWNTO 0 );
-             	RegWrite 			: OUT 	STD_LOGIC;
-             	MemRead 			: OUT 	STD_LOGIC;
-             	MemWrite 			: OUT 	STD_LOGIC;
-             	Branch 				: OUT 	STD_LOGIC_VECTOR( 1 DOWNTO 0 );
-				Jump       			: OUT   STD_LOGIC_VECTOR( 1 DOWNTO 0 );
-             	ALUop 				: OUT 	STD_LOGIC_VECTOR( AluOpSize-1 DOWNTO 0 );
-             	clock, reset		: IN 	STD_LOGIC );
+	       PORT( 	
+				Opcode 		: IN 	STD_LOGIC_VECTOR( cmd_size-1 DOWNTO 0 );
+				func_op 	: IN 	STD_LOGIC_VECTOR( cmd_size-1 DOWNTO 0 );
+				clock, reset: IN 	STD_LOGIC;
+				RegDst 		: OUT 	STD_LOGIC_VECTOR( 1 DOWNTO 0 );
+				ALUSrc 		: OUT 	STD_LOGIC;
+				MemtoReg 	: OUT 	STD_LOGIC_VECTOR( 1 DOWNTO 0 );
+				RegWrite 	: OUT 	STD_LOGIC;
+				MemRead 	: OUT 	STD_LOGIC;
+				MemWrite 	: OUT 	STD_LOGIC;
+				Branch 		: OUT 	STD_LOGIC_VECTOR( 1 DOWNTO 0 );
+				Jump 		: OUT 	STD_LOGIC_VECTOR( 1 DOWNTO 0 );
+				ALUop 		: OUT 	STD_LOGIC_VECTOR( AluOpSize-1 DOWNTO 0 )
+			);
 END COMPONENT;
 
 COMPONENT  Execute
@@ -94,18 +102,19 @@ COMPONENT  Execute
 		PC_size : positive := 10;
 		change_size: positive := 8;
 		mult_size: positive := 64	); 
-   	    PORT(	Read_data_1 	: IN 	STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
+   	   	PORT(	Read_data_1 	: IN 	STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
 			Read_data_2 	: IN 	STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
 			Sign_extend 	: IN 	STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
 			shamt 			: IN 	STD_LOGIC_VECTOR( shamt_size-1 DOWNTO 0 );
 			Function_opcode : IN 	STD_LOGIC_VECTOR( func_op_size-1 DOWNTO 0 );
 			ALUOp 			: IN 	STD_LOGIC_VECTOR( AluOpSize-1 DOWNTO 0 );
 			ALUSrc 			: IN 	STD_LOGIC;
+			PC_plus_4 		: IN 	STD_LOGIC_VECTOR( PC_size-1 DOWNTO 0 );
+			clock, reset	: IN 	STD_LOGIC;
 			Zero 			: OUT	STD_LOGIC;
 			ALU_Result 		: OUT	STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
-			Add_Result 		: OUT	STD_LOGIC_VECTOR( add_res_size-1 DOWNTO 0 );
-			PC_plus_4 		: IN 	STD_LOGIC_VECTOR( PC_size-1 DOWNTO 0 );
-			clock, reset	: IN 	STD_LOGIC );
+			Add_Result 		: OUT	STD_LOGIC_VECTOR( add_res_size-1 DOWNTO 0 )
+			);
 END COMPONENT;
 
 COMPONENT dmemory
@@ -156,7 +165,6 @@ PORT(  clock,reset       		    	 : IN 	 STD_LOGIC;
 		   memRead,	memWrite 			 : IN 	 STD_LOGIC;
 		   Address_Bus       			 : IN 	 STD_LOGIC_VECTOR( address_size_orig-1 DOWNTO 0 );
 		   SW   			 			 : IN 	 STD_LOGIC_VECTOR(7 DOWNTO 0);
-		   CS1,CS2,CS3,CS4,CS5,CS6,CS7,CS8,CS9 : IN 	 STD_LOGIC;
 		   Data_Bus         			 : INOUT STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
 		   Leds							 : OUT 	 STD_LOGIC_VECTOR(7 DOWNTO 0 );
 		   Hex0,Hex1,Hex2,Hex3,Hex4,Hex5 : OUT 	 STD_LOGIC_VECTOR(6 DOWNTO 0 );
@@ -182,6 +190,26 @@ COMPONENT BasicTimer IS
 			set_TBIFG 				: OUT	STD_LOGIC;
 			BTCNT_Out 				: OUT	STD_LOGIC_VECTOR( 31 DOWNTO 0 )
 			);
+END 	COMPONENT;
+
+
+COMPONENT IV IS
+	generic (
+			ResSize : positive := 32;
+			address_size_orig :positive:=12
+			); 
+	PORT(  
+			Address_Bus      	 : IN 	 STD_LOGIC_VECTOR( address_size_orig-1 DOWNTO 0 );
+			memRead,memWrite 	 : IN 	 STD_LOGIC;
+			reqSrcKey1			 : IN	 STD_LOGIC;
+			reqSrcKey2			 : IN	 STD_LOGIC;
+			reqSrcKey3			 : IN	 STD_LOGIC;
+			reqSrcBT 			 : IN	 STD_LOGIC;
+			INTA				 : IN	 STD_LOGIC;
+			GIE 				 : IN	 STD_LOGIC;
+			INTR			 	 : OUT	 STD_LOGIC;
+			Data_Bus    		 : INOUT STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 )
+		   );
 END 	COMPONENT;
 
 end aux_package;

@@ -28,11 +28,12 @@ generic ( AluOpSize : positive := 9;
 			Function_opcode : IN 	STD_LOGIC_VECTOR( func_op_size-1 DOWNTO 0 );
 			ALUOp 			: IN 	STD_LOGIC_VECTOR( AluOpSize-1 DOWNTO 0 );
 			ALUSrc 			: IN 	STD_LOGIC;
+			PC_plus_4 		: IN 	STD_LOGIC_VECTOR( PC_size-1 DOWNTO 0 );
+			clock, reset	: IN 	STD_LOGIC;
 			Zero 			: OUT	STD_LOGIC;
 			ALU_Result 		: OUT	STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
-			Add_Result 		: OUT	STD_LOGIC_VECTOR( add_res_size-1 DOWNTO 0 );
-			PC_plus_4 		: IN 	STD_LOGIC_VECTOR( PC_size-1 DOWNTO 0 );
-			clock, reset	: IN 	STD_LOGIC );
+			Add_Result 		: OUT	STD_LOGIC_VECTOR( add_res_size-1 DOWNTO 0 )
+			);
 END Execute;
 
 ARCHITECTURE behavior OF Execute IS

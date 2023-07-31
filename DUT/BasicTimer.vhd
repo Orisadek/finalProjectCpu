@@ -45,21 +45,36 @@ BTCL1<=BTCCR1;
 
 flag<= BTCNT-BTCL1;
 
-
-
 OUT_signal<='1' when (flag(31)='1' and BTOUTEN='1') else
 			'0';
 
 
-set_TBIFG <= '1' when BTIP="000" and Q0  = '1' else
-			 '1' when BTIP="001" and Q3  = '1' else
-			 '1' when BTIP="010" and Q7  = '1' else
-			 '1' when BTIP="011" and Q11 = '1' else
-			 '1' when BTIP="100" and Q15 = '1' else
-			 '1' when BTIP="101" and Q19 = '1' else
-			 '1' when BTIP="110" and Q23 = '1' else
-			 '1' when BTIP="111" and Q25 = '1' else
-			 '0';
+set_TBIFG_proc:process(Q0,Q3,Q7,Q11,Q15,Q19,Q23,Q25,clock)
+	
+	BEGIN
+		if(Q0'EVENT  AND Q0 = '1' and BTIP="000") THEN
+			set_TBIFG<='1';
+		elsif(Q3'EVENT  AND Q3 = '1' and BTIP="001") THEN
+			set_TBIFG<='1';
+		elsif(Q7'EVENT  AND Q7 = '1' and BTIP="010") THEN
+			set_TBIFG<='1';
+		elsif(Q11'EVENT  AND Q11 = '1' and BTIP="011") THEN
+			set_TBIFG<='1';
+		elsif(Q15'EVENT  AND Q15 = '1' and BTIP="100") THEN
+			set_TBIFG<='1';
+		elsif(Q19'EVENT  AND Q19 = '1' and BTIP="101") THEN
+			set_TBIFG<='1';
+		elsif(Q23'EVENT  AND Q23 = '1' and BTIP="110") THEN
+			set_TBIFG<='1';
+		elsif(Q25'EVENT  AND Q25 = '1' and BTIP="111") THEN
+			set_TBIFG<='1';
+		elsif(clock'EVENT  AND clock = '1') THEN
+			set_TBIFG<='0';
+		else
+			NULL;
+		end if;
+	END process;
+
 
 
 timer_proc:process(clock)
@@ -77,7 +92,9 @@ timer_proc:process(clock)
 					count:=0;
 				elsif(BTHOLD='0') THEN
 					count:=count+1;
-					if(BTCL0=BTCNT) THEN
+					if(BTOUTEN = '1' and BTCNT=BTCL0) THEN
+						BTCNT_tmp:=(others=>'0');
+					elsif(BTOUTEN = '0' and BTCNT =X"11111111") THEN
 						BTCNT_tmp:=(others=>'0');
 					else
 						BTCNT_tmp:=BTCNT+1;

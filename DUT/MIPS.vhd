@@ -19,8 +19,11 @@ ENTITY MIPS IS
 			  address_size_orig :positive:=12
 			); 
 	PORT( reset,ena, clock		: IN 	STD_LOGIC; 
+		INTR			 	 	: IN	STD_LOGIC;
 		Memwrite_out,MemRead_out: OUT 	STD_LOGIC ;
 		Address_Bus   			: OUT 	STD_LOGIC_VECTOR( address_size_orig-1 DOWNTO 0 );
+		INTA					: OUT	STD_LOGIC;
+		GIE 				    : OUT	 STD_LOGIC;
 		Data_Bus   			    : INOUT STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 )
 		);
 END 	MIPS;
@@ -46,7 +49,7 @@ ARCHITECTURE structure OF MIPS IS
 	SIGNAL ALUop 			: STD_LOGIC_VECTOR( AluOpSize-1 DOWNTO 0 );
 	SIGNAL Instruction		: STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
 	SIGNAL JumpAdress		: STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
-	SIGNAL read_data_mem 	: STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
+	SIGNAL read_data_mem 	: STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );         
 	alias address is ALU_Result(address_size_orig-1 DOWNTO 0);
 	alias isGPIO  is address(address_size_orig-1);
 BEGIN
@@ -83,7 +86,8 @@ BEGIN
 				RegDst 			=> RegDst,
 				Sign_extend 	=> Sign_extend,
 				PC_plus_4       => PC_plus_4,
-        		clock 			=> clock,  
+        		clock 			=> clock,
+				GIE				=> GIE,			
 				reset 			=> reset );
 
 

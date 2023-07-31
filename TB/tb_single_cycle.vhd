@@ -72,7 +72,8 @@ BEGIN
 		  SW <= (others => '0');
 		  for i in 0 to 10 loop
 			wait for 500 ns;
-				SW <= SW+1;
+			SW <= (others => '0');
+				--SW <= SW+1;
 		  end loop;
 		  wait;
         end process;
