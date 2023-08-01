@@ -21,22 +21,32 @@ generic ( isModelSim  : boolean;
 		); 
 	PORT(	 Instruction 		: OUT	STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
         	 PC_plus_4_out  	: OUT	STD_LOGIC_VECTOR( PC_size-1 DOWNTO 0 ); 
-			 --PC_out 			: OUT	STD_LOGIC_VECTOR( PC_size-1 DOWNTO 0 );
+			 PC_out 			: OUT	STD_LOGIC_VECTOR( PC_size-1 DOWNTO 0 );
+			 reset_local		: OUT	STD_LOGIC;
+			 clr_req			: OUT   STD_LOGIC_VECTOR( 4 DOWNTO 0 );
         	 Add_result 		: IN 	STD_LOGIC_VECTOR( change_size-1 DOWNTO 0 );
         	 Branch 			: IN 	STD_LOGIC_VECTOR( 1 DOWNTO 0 );
         	 Zero 			    : IN 	STD_LOGIC;
-        	 clock, reset 		: IN 	STD_LOGIC;
+        	 clock		  		: IN 	STD_LOGIC;
 			 data_reg 			: IN 	STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
-			 Jump       		: IN   STD_LOGIC_VECTOR( 1 DOWNTO 0 );
-			 JumpAdress			: IN   STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 )
+			 Jump       		: IN    STD_LOGIC_VECTOR( 1 DOWNTO 0 );
+			 JumpAdress			: IN    STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
+			 read_data_mem   	: IN 	STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
+			 reqType			: IN 	STD_LOGIC_VECTOR( 2 DOWNTO 0 );
+			 INTA				: IN	STD_LOGIC
 			 );
 END Ifetch;
 
 ARCHITECTURE behavior OF Ifetch IS
-	SIGNAL PC, PC_plus_4 	: STD_LOGIC_VECTOR( PC_size-1 DOWNTO 0 ); --note that we set an additional signal for pc+4 for convinience 
-	SIGNAL next_PC , MUXres : STD_LOGIC_VECTOR( change_size-1 DOWNTO 0 );
-	SIGNAL Mem_Addr 	    : STD_LOGIC_VECTOR( address_size-1 DOWNTO 0 );
-	
+	SIGNAL PC, PC_plus_4 	 : STD_LOGIC_VECTOR( PC_size-1 DOWNTO 0 ); --note that we set an additional signal for pc+4 for convinience 
+	SIGNAL next_PC , MUXres  : STD_LOGIC_VECTOR( change_size-1 DOWNTO 0 );
+	SIGNAL Mem_Addr 	     : STD_LOGIC_VECTOR( address_size-1 DOWNTO 0 );
+	SIGNAL Instruction_local : STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
+	alias clrReset is clr_req(0);
+	alias clrBT    is clr_req(1);
+	alias clrKey1  is clr_req(2);
+	alias clrKey2  is clr_req(3);
+	alias clrKey3  is clr_req(4);
 BEGIN
 						--ROM for Instruction Memory
 inst_memory: altsyncram
@@ -47,17 +57,20 @@ inst_memory: altsyncram
 		widthad_a => address_size,
 		lpm_type => "altsyncram",
 		outdata_reg_a => "UNREGISTERED",
-		init_file => "C:\Users\orisa\source\modelSim\work\L1_Caches\hex_gpio\prog_hex1.hex",
+		init_file => "C:\Users\orisa\source\modelSim\work\L1_Caches\hex_interrupts\prog_hex2.hex",
 		intended_device_family => "Cyclone"
 	)
 	PORT MAP (
 		clock0     => clock,
 		address_a 	=> Mem_Addr, 
-		q_a 			=> Instruction );
+		q_a 			=> Instruction_local );
+		
+		Instruction<=Instruction_local WHEN not (INTA = '0') ELSE
+					(others=>'0');
 					-- Instructions always start on word address - not byte
 		PC(1 DOWNTO 0) <= "00";
 					-- copy output signals - allows read inside module
-		--PC_out 			<= PC;
+		PC_out 			<= PC;
 		PC_plus_4_out 	<= PC_plus_4;
 						-- send address to inst. memory address register
 						
@@ -73,21 +86,26 @@ inst_memory: altsyncram
       	PC_plus_4( PC_size-1 DOWNTO 2 )  <= PC( PC_size-1 DOWNTO 2 ) + 1;
        	PC_plus_4( 1 DOWNTO 0 )  <= "00";
 						-- Mux to select Branch Address or PC + 4        
-		MUXres  <= X"00" WHEN Reset = '1' ELSE
-			Add_result  WHEN ( (( Branch(0) = '1' ) AND ( Zero = '1' )) or(( Branch(1) = '1' ) AND ( Zero = '0' )) )
-			ELSE   PC_plus_4( PC_size-1 DOWNTO 2 );
+		MUXres  <= Add_result  WHEN ( (( Branch(0) = '1' ) AND ( Zero = '1' )) or(( Branch(1) = '1' ) AND ( Zero = '0' )) )
+					ELSE   PC_plus_4( PC_size-1 DOWNTO 2 );
 			
-		next_PC <= MUXres when Jump = "00" else 
-				   data_reg(PC_size-1 DOWNTO 2 ) when Jump = "01" else --jr 
-				   JumpAdress( PC_size-1 DOWNTO 2 ) when (Jump = "10" or Jump = "11") else --jal,j
+		next_PC <= MUXres when (Jump = "00" and  INTA='1') else 
+				   data_reg(PC_size-1 DOWNTO 2 ) when (Jump = "01" and  INTA='1') else --jr 
+				   JumpAdress( PC_size-1 DOWNTO 2 ) when ((Jump = "10" or Jump = "11") and  INTA='1') else --jal,j
+				   read_data_mem(PC_size-1 DOWNTO 2) when INTA='0' ELSE
 				   (others=>'0');
-					
-	fetch_proc:process(clock)
+				   
+		reset_local<='1' WHEN (read_data_mem(PC_size-1 DOWNTO 2)=X"00" AND INTA = '0') ELSE '0';			
+		--------------------------------------------clear req--------------------------------------------------------------------------------
+		clrReset	<='1' when (reqType="000" AND INTA = '0') ELSE '0';
+		clrBT		<='1' when (reqType="001" AND INTA = '0') ELSE '0';
+		clrKey1		<='1' when (reqType="010" AND INTA = '0') ELSE '0';
+		clrKey2		<='1' when (reqType="011" AND INTA = '0') ELSE '0';
+		clrKey3		<='1' when (reqType="100" AND INTA = '0') ELSE '0';
+		
+		fetch_proc:process(clock)
 		BEGIN
-		--	WAIT UNTIL ( clock'EVENT ) AND ( clock = '1' );
-			IF (reset = '1')THEN
-				   PC(PC_size-1 DOWNTO 2) <= (others=>'0') ; 
-			elsif( clock'EVENT  AND clock = '1') then
+			if( clock'EVENT  AND clock = '1') then
 				   PC(PC_size-1 DOWNTO 2 ) <= next_PC;
 			END IF;
 	END process;

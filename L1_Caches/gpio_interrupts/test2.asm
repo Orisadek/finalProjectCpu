@@ -51,7 +51,7 @@ main:	addi $sp,$zero,0x800 # $sp=0x800
 	sw   $0,0x82C        # IE=0
 	sw   $0,0x82D        # IFG=0
 	addi $t0,$zero,0x1F  
-	sw   $t0,0x824       # BTIP=7, BTSSEL=3, BTHOLD=0
+	sw   $t0,0x824       # 
 	addi $t0,$zero,0x3C 
 	sw   $t0,0x82C       # IE=0x3C
 	ori  $k0,$k0,0x01    # EINT, $k0[0]=1 uses as GIE
