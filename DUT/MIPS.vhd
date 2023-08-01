@@ -55,11 +55,11 @@ ARCHITECTURE structure OF MIPS IS
 	SIGNAL INTA_local			: STD_LOGIC;
 	SIGNAL reset_local_mips   	: STD_LOGIC;
 	SIGNAL reqType				: STD_LOGIC_VECTOR( 2 DOWNTO 0 );
-	
+	SIGNAL clr_req_local        : STD_LOGIC_VECTOR( 4 DOWNTO 0 );
 	alias address is ALU_Result(address_size_orig-1 DOWNTO 0);
 	alias isGPIO  is address(address_size_orig-1);
 BEGIN
-				
+	clr_req 		<= clr_req_local;	
     MemRead_out		<= MemRead  when INTA_local='1' else '1';	
     MemWrite_out 	<= MemWrite;	
     Address_Bus     <= address  when INTA_local='1' else X"82E";
@@ -104,7 +104,7 @@ BEGIN
 				Jump            => Jump,
 				INTA			=> INTA_local,
 				reqType         => reqType,
-				clr_req         => clr_req,
+				clr_req         => clr_req_local,
 				reset_local    	=> reset_local_mips,
 				JumpAdress		=> JumpAdress
 				);
@@ -123,7 +123,8 @@ BEGIN
 				PC_plus_4       => PC_plus_4,
         		clock 			=> clock,
 				GIE				=> GIE,
-				INTA			=> INTA_local,				
+				INTA			=> INTA_local,
+				clr_req			=> clr_req_local,	
 				reset_local 	=> reset_local_mips );
 
 

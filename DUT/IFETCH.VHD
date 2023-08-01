@@ -97,11 +97,23 @@ inst_memory: altsyncram
 				   
 		reset_local<='1' WHEN (read_data_mem(PC_size-1 DOWNTO 2)=X"00" AND INTA = '0') ELSE '0';			
 		--------------------------------------------clear req--------------------------------------------------------------------------------
-		clrReset	<='1' when (reqType="000" AND INTA = '0') ELSE '0';
-		clrBT		<='1' when (reqType="001" AND INTA = '0') ELSE '0';
-		clrKey1		<='1' when (reqType="010" AND INTA = '0') ELSE '0';
-		clrKey2		<='1' when (reqType="011" AND INTA = '0') ELSE '0';
-		clrKey3		<='1' when (reqType="100" AND INTA = '0') ELSE '0';
+		clr_proc:process(clock)
+		BEGIN
+			if( clock'EVENT  AND clock = '1') then
+					if(INTA = '0') then
+						case reqType IS
+							WHEN "000" => clrReset <='1';
+							WHEN "001" => clrBT    <='1';
+							WHEN "010" => clrKey1  <='1';
+							WHEN "011" => clrKey2  <='1';
+							WHEN "100" => clrKey3  <='1';
+							WHEN OTHERS	=> clr_req<=(OTHERS=>'0');
+						END case;
+					ELSE
+						clr_req<=(OTHERS=>'0');
+					END IF;
+			END IF;
+		END process;
 		
 		fetch_proc:process(clock)
 		BEGIN

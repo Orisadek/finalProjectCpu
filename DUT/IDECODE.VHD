@@ -29,6 +29,7 @@ generic ( 	AluOpSize  : positive  := 9;
 			PC_plus_4   		: IN    STD_LOGIC_VECTOR( PC_size-1 DOWNTO 0 ); 
 			clock,reset_local	: IN 	STD_LOGIC;
 			INTA  				: IN 	STD_LOGIC;
+			clr_req				: IN   STD_LOGIC_VECTOR( 4 DOWNTO 0 );
 			Sign_extend 		: OUT 	STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
 			read_data_1			: OUT 	STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
 			read_data_2			: OUT 	STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
@@ -47,10 +48,14 @@ TYPE register_file IS ARRAY ( 0 TO ResSize-1 ) OF STD_LOGIC_VECTOR( ResSize-1 DO
 	SIGNAL read_register_2_address		: STD_LOGIC_VECTOR( cmd_size-1 DOWNTO 0 );
 	SIGNAL write_register_address_1		: STD_LOGIC_VECTOR( cmd_size-1 DOWNTO 0 );
 	SIGNAL write_register_address_0		: STD_LOGIC_VECTOR( cmd_size-1 DOWNTO 0 );
-	SIGNAL Instruction_immediate_value_I	: STD_LOGIC_VECTOR( Imm_val_I-1 DOWNTO 0 );
-	SIGNAL Instruction_immediate_value_J	: STD_LOGIC_VECTOR( Imm_val_J-1 DOWNTO 0 );
-	SIGNAL zeroes				: STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
-	SIGNAL J				    : STD_LOGIC;
+	SIGNAL Instruction_imm_value_I		: STD_LOGIC_VECTOR( Imm_val_I-1 DOWNTO 0 );
+	SIGNAL Instruction_imm_value_J		: STD_LOGIC_VECTOR( Imm_val_J-1 DOWNTO 0 );
+	SIGNAL zeroes					    : STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
+	SIGNAL J				            : STD_LOGIC;
+	SIGNAL reti               	        : STD_LOGIC;
+	alias Opcode  IS Instruction( 31 DOWNTO 26 );
+	alias func_op IS Instruction( 5 DOWNTO 0 );
+	alias clrReset is clr_req(0);
 	
 	
 	
@@ -60,40 +65,40 @@ BEGIN
    	write_register_address_1	<= Instruction( 15 DOWNTO 11 );
    	write_register_address_0 	<= Instruction( 20 DOWNTO 16 );
 	
-   	Instruction_immediate_value_I <= Instruction( Imm_val_I-1 DOWNTO 0 ); --decompositioning Immediate part of the intruction
-	Instruction_immediate_value_J<=Instruction( Imm_val_J-1 DOWNTO 0 );
+   	Instruction_imm_value_I <= Instruction( Imm_val_I-1 DOWNTO 0 ); --decompositioning Immediate part of the intruction
+	Instruction_imm_value_J  <=Instruction( Imm_val_J-1 DOWNTO 0 );
 	J <= '1' when (Instruction(ResSize-1 downto 26) = "000010" or Instruction(ResSize-1 downto 26) = "000011") ELSE --detecting wether J type is required
 	'0'; --- jmp or jal
 	zeroes<=(OTHERS =>'0');
 					-- Read Register 1 Operation
 					
-	--reti <= '1' when CONV_INTEGER( read_register_1_address ) = K1 else '0';
+	reti <= '1' when (CONV_INTEGER( read_register_1_address ) = K1 and Opcode=X"00"&B"00" and func_op = "001000") else '0';
+	
 	read_data_1 <= register_array( CONV_INTEGER( read_register_1_address ) );
 					-- Read Register 2 Operation		 
 	read_data_2 <= register_array( CONV_INTEGER( read_register_2_address ) );
 					-- Mux for Register Write Address
 	
 	
-   write_register_address <= write_register_address_1 WHEN (RegDst = "01" and  INTA = '1')  ELSE 
-							write_register_address_0  WHEN (RegDst = "00" and  INTA = '1')  ELSE 
-							CONV_STD_LOGIC_VECTOR( ResSize-1, cmd_size ) WHEN (RegDst = "10" and  INTA = '1')  ELSE 
-							CONV_STD_LOGIC_VECTOR( K1, cmd_size ) when INTA = '0' else
+   write_register_address <= write_register_address_1 WHEN RegDst = "01"    ELSE 
+							write_register_address_0  WHEN RegDst = "00"    ELSE 
+							CONV_STD_LOGIC_VECTOR( ResSize-1, cmd_size ) WHEN RegDst = "10"  ELSE 
 							(others=>'0');
 							
 					-- Mux to bypass data memory for Rformat instructions
-	write_data <= ALU_result( ResSize-1 DOWNTO 0 ) WHEN ( MemtoReg = "00" and  INTA = '1') ELSE 
+	write_data <= ALU_result( ResSize-1 DOWNTO 0 ) WHEN  MemtoReg = "00"    ELSE 
 				  read_data  WHEN ( MemtoReg = "01" ) ELSE  
-				  zeroes(ResSize-1 downto PC_size )&PC_plus_4 WHEN ( MemtoReg = "10" OR INTA = '0' ) ELSE   
+				  zeroes(ResSize-1 downto PC_size )&PC_plus_4 WHEN MemtoReg = "10"  ELSE   
 				  (others=>'0');
 					-- Sign Extend 16-bits to 32-bits
 		--- sign extention
-    	Sign_extend <= X"0000" & Instruction_immediate_value_I WHEN (Instruction_immediate_value_I(Imm_val_I-1) = '0' 
+    	Sign_extend <= X"0000" & Instruction_imm_value_I WHEN (Instruction_imm_value_I(Imm_val_I-1) = '0' 
 		and J = '0') ELSE
-		X"FFFF" & Instruction_immediate_value_I when (Instruction_immediate_value_I(Imm_val_I-1) = '1' 
+		X"FFFF" & Instruction_imm_value_I when (Instruction_imm_value_I(Imm_val_I-1) = '1' 
 		and J = '0') ELSE
-		B"000000" & Instruction_immediate_value_J WHEN (Instruction_immediate_value_J(Imm_val_J-1) = '0' 
+		B"000000" & Instruction_imm_value_J WHEN (Instruction_imm_value_J(Imm_val_J-1) = '0' 
 		and J = '1') ELSE
-		B"111111" & Instruction_immediate_value_J when (Instruction_immediate_value_J(Imm_val_J-1) = '1' 
+		B"111111" & Instruction_imm_value_J when (Instruction_imm_value_J(Imm_val_J-1) = '1' 
 		and J = '1');
 
 PROCESS
@@ -104,15 +109,21 @@ PROCESS
 					-- use loop to automatically generate reset logic 
 					-- for all registers
 			FOR i IN 0 TO ResSize-1 LOOP
-				register_array(i) <= CONV_STD_LOGIC_VECTOR( i, ResSize );
- 			END LOOP;
-					-- Write back to register - don't write to register 0
-  		ELSIF RegWrite = '1' AND write_register_address /= 0 THEN
+			    IF(i = K0) THEN
+					register_array(i) <= CONV_STD_LOGIC_VECTOR( i+1, ResSize );
+				ELSE
+					register_array(i) <= CONV_STD_LOGIC_VECTOR( i, ResSize );
+				END if;
+ 			END LOOP;	
+		ELSIF(INTA = '0') then
+			register_array(K0)(0) <= '0';	
+			register_array(K1) <= zeroes(ResSize-1 downto PC_size )&PC_plus_4;
+		ELSIF(reti='1') THEN
+			register_array(K0)(0) <= '1';	
+  		ELSIF RegWrite = '1' AND write_register_address /= 0 THEN -- Write back to register - don't write to register 0
 		      register_array(CONV_INTEGER(write_register_address)) <= write_data;
 		END IF;
-		IF(INTA = '0') then
-			register_array(K0)(0) <= '0';		
-		END IF;
+		
 END PROCESS;
 	GIE <= register_array(K0)(0);
 END behavior;

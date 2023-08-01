@@ -122,13 +122,13 @@ begin
 			  B"1"& X"0" WHEN (BTIFG='1'   and reqReset='0')  else
 			  B"1"& X"4" WHEN (KEY1IFG='1' and BTIFG='0'   and reqReset='0') else
 			  B"1"& X"8" WHEN (KEY2IFG='1' and KEY1IFG='0' and BTIFG='0'   and reqReset='0') else
-			  B"1"& X"C" WHEN (KEY3IFG='1' and KEY2IFG='1' and KEY1IFG='0' and BTIFG='0' and reqReset='0' else
+			  B"1"& X"C" WHEN (KEY3IFG='1' and KEY2IFG='1' and KEY1IFG='0' and BTIFG='0' and reqReset='0') else
 			  (others=>'X');
 	
 	TYPE_V(7 DOWNTO 5)<= (others=>'0');
 	
 	
-	INTR <= (((reqBT and BTIE) or (reqKey1 and KEY1IE) or (reqKey2 and KEY2IE) or (reqKey3 and KEY3IE))and GIE) or reqReset;  
+	INTR <= (((reqBT and BTIE) or (reqKey1 and KEY1IE) or (reqKey2 and KEY2IE) or (reqKey3 and KEY3IE)) and (GIE and INTA )) or reqReset;  
 	
 
 	

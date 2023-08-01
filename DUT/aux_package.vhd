@@ -66,20 +66,21 @@ generic ( 	AluOpSize  : positive  := 9;
 			Imm_val_J  : positive  :=26;
 			K0 		   : positive  :=26
 			);
- 	    PORT(	
-			Instruction : IN 	STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
-			read_data 	: IN 	STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );   
-			ALU_result	: IN 	STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
-			RegWrite 	: IN 	STD_LOGIC;
-			MemtoReg 	: IN 	STD_LOGIC_VECTOR( 1 DOWNTO 0 );
-			RegDst 		: IN 	STD_LOGIC_VECTOR( 1 DOWNTO 0 );
-			PC_plus_4   : IN    STD_LOGIC_VECTOR( PC_size-1 DOWNTO 0 ); 
+ 	   	  PORT(	
+			Instruction 		: IN 	STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
+			read_data 			: IN 	STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );   
+			ALU_result			: IN 	STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
+			RegWrite 			: IN 	STD_LOGIC;
+			MemtoReg 			: IN 	STD_LOGIC_VECTOR( 1 DOWNTO 0 );
+			RegDst 				: IN 	STD_LOGIC_VECTOR( 1 DOWNTO 0 );
+			PC_plus_4   		: IN    STD_LOGIC_VECTOR( PC_size-1 DOWNTO 0 ); 
 			clock,reset_local	: IN 	STD_LOGIC;
-			INTA  		: IN 	STD_LOGIC;
-			Sign_extend : OUT 	STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
-			read_data_1	: OUT 	STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
-			read_data_2	: OUT 	STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
-			GIE  		: OUT 	STD_LOGIC
+			INTA  				: IN 	STD_LOGIC;
+			clr_req				: IN   STD_LOGIC_VECTOR( 4 DOWNTO 0 );
+			Sign_extend 		: OUT 	STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
+			read_data_1			: OUT 	STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
+			read_data_2			: OUT 	STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
+			GIE  				: OUT 	STD_LOGIC
 		 );
 END COMPONENT;
 
