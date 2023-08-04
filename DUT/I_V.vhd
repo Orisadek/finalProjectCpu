@@ -27,11 +27,10 @@ ENTITY IV IS
 END 	IV;
 
 ARCHITECTURE behavior OF IV IS
-signal IE,IFG,TYPE_V 				    		: STD_LOGIC_VECTOR( 7 DOWNTO 0 );	
-signal CS10 		 							:  STD_LOGIC;
+signal IE,IFG,TYPE_V 				    : STD_LOGIC_VECTOR( 7 DOWNTO 0 );	
+signal CS10,flag 		 						:  STD_LOGIC;
 signal reqKey1,reqKey2,reqKey3,reqBT,reqReset 	:  STD_LOGIC;
-
-
+--signal BTIFG_local,KEY1IFG_local,KEY2IFG_local,KEY3IFG_local :  STD_LOGIC;
 alias BTIE 	 is IE(2);
 alias KEY1IE is IE(3);
 alias KEY2IE is IE(4);
@@ -74,10 +73,15 @@ begin
 			else
 				NULL;
 			end IF;
+		else
+			null;	
 		end IF;
 	END process;
 ---------------------------------------------read iv type ------------------------------------------------	
-	Data_Bus<=X"000000"&TYPE_V WHEN (CS10='1' AND A0='0'AND A1='1' and memRead = '1' and INTA='0') else (others=>'Z');
+	Data_Bus<=X"000000"&TYPE_V WHEN (CS10='1' AND A0='0'AND A1='1' and memRead = '1' and INTA='0' AND (GIE='1' or reqReset='1')) else 
+			unaffected when (CS10='1' AND A0='0'AND A1='1' and memRead = '1' and INTA='0'and  GIE='0' and reqReset='0')else
+			  X"000000"&IFG when (CS10='1' and memRead='1' and A0='1'AND A1='0') else
+			(others=>'Z');	
 ---------------------------------------------------------------------------------------------------------	
 	
 	intr_handle_proc:process(reqSrcKey1,reqSrcKey2,reqSrcKey3,reqSrcBT,reset,clr_req)
@@ -111,24 +115,25 @@ begin
 		END if;
 	END process;
 
+
 	
-	BTIFG 	<= reqBT and BTIE;
-	KEY1IFG <= reqKey1 and KEY1IE;
-	KEY2IFG <= reqKey2 and KEY2IE;
-	KEY3IFG <= reqKey3 and KEY3IE;		
+	BTIFG   <= (reqBT and BTIE);
+	KEY1IFG <= (reqKey1 and KEY1IE);
+	KEY2IFG <= (reqKey2 and KEY2IE) ; 
+	KEY3IFG <= (reqKey3 and KEY3IE );
+
 	
 	
-	TYPEx <=  B"0"& X"0" WHEN reqReset='1' else
-			  B"1"& X"0" WHEN (BTIFG='1'   and reqReset='0')  else
-			  B"1"& X"4" WHEN (KEY1IFG='1' and BTIFG='0'   and reqReset='0') else
-			  B"1"& X"8" WHEN (KEY2IFG='1' and KEY1IFG='0' and BTIFG='0'   and reqReset='0') else
-			  B"1"& X"C" WHEN (KEY3IFG='1' and KEY2IFG='1' and KEY1IFG='0' and BTIFG='0' and reqReset='0') else
+	TYPEx <=  "00000" WHEN reqReset='1' else
+			  "00100" WHEN (BTIFG='1'   and reqReset='0')  else
+			  "00101" WHEN (KEY1IFG='1' and BTIFG='0'   and reqReset='0') else
+			  "00110" WHEN (KEY2IFG='1' and KEY1IFG='0' and BTIFG='0'   and reqReset='0') else
+			  "00111" WHEN (KEY3IFG='1' and KEY2IFG='1' and KEY1IFG='0' and BTIFG='0' and reqReset='0') else
 			  (others=>'X');
 	
 	TYPE_V(7 DOWNTO 5)<= (others=>'0');
-	
-	
-	INTR <= (((reqBT and BTIE) or (reqKey1 and KEY1IE) or (reqKey2 and KEY2IE) or (reqKey3 and KEY3IE)) and (GIE and INTA )) or reqReset;  
+
+	INTR <= ((BTIFG or KEY1IFG or KEY2IFG or KEY3IFG) and GIE) or reqReset;  
 	
 
 	

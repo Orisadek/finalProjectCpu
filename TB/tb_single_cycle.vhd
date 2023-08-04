@@ -80,9 +80,29 @@ BEGIN
 		  SW <= (others => '0');
 		  for i in 0 to 10 loop
 			wait for 500 ns;
-			SW <= (others => '0');
-				--SW <= SW+1;
+			--SW <= (others => '0');
+				SW <= SW+1;
 		  end loop;
 		  wait;
+        end process;
+		
+	  keys : process
+        begin
+			Key1 <= '1';
+			Key2 <= '1';
+			Key3 <= '1';
+		WAIT for 1000 ns;
+			Key1 <= '0';
+		WAIT for 25 ns;
+			Key1 <= '1';
+		WAIT for 500 ns;
+			Key2 <= '0';
+		WAIT for 25 ns;
+			Key2 <= '1';
+		WAIT for 750 ns;
+			Key3 <= '0';
+		WAIT for 25 ns;
+			Key3 <= '1';
+		wait;
         end process;
 END struct;

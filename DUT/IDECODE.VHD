@@ -109,11 +109,11 @@ PROCESS
 					-- use loop to automatically generate reset logic 
 					-- for all registers
 			FOR i IN 0 TO ResSize-1 LOOP
-			    IF(i = K0) THEN
-					register_array(i) <= CONV_STD_LOGIC_VECTOR( i+1, ResSize );
-				ELSE
+			 --   IF(i = K0) THEN
+			--		register_array(i) <= CONV_STD_LOGIC_VECTOR( i+1, ResSize );
+			--	ELSE
 					register_array(i) <= CONV_STD_LOGIC_VECTOR( i, ResSize );
-				END if;
+			--	END if;
  			END LOOP;	
 		ELSIF(INTA = '0') then
 			register_array(K0)(0) <= '0';	

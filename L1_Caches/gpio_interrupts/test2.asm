@@ -34,7 +34,7 @@
 		.word UartRX_ISR
 		.word UartRX_ISR
 		.word UartTX_ISR
-	        .word BT_ISR
+	    .word BT_ISR
 		.word KEY1_ISR
 		.word KEY2_ISR
 		.word KEY3_ISR

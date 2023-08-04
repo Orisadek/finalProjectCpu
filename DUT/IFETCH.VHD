@@ -42,6 +42,7 @@ ARCHITECTURE behavior OF Ifetch IS
 	SIGNAL next_PC , MUXres  : STD_LOGIC_VECTOR( change_size-1 DOWNTO 0 );
 	SIGNAL Mem_Addr 	     : STD_LOGIC_VECTOR( address_size-1 DOWNTO 0 );
 	SIGNAL Instruction_local : STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
+	SIGNAL flag				 : STD_LOGIC;
 	alias clrReset is clr_req(0);
 	alias clrBT    is clr_req(1);
 	alias clrKey1  is clr_req(2);
@@ -95,7 +96,7 @@ inst_memory: altsyncram
 				   read_data_mem(PC_size-1 DOWNTO 2) when INTA='0' ELSE
 				   (others=>'0');
 				   
-		reset_local<='1' WHEN (read_data_mem(PC_size-1 DOWNTO 2)=X"00" AND INTA = '0') ELSE '0';			
+		reset_local<='1' WHEN (reqType="000" AND INTA = '0') ELSE '0';			
 		--------------------------------------------clear req--------------------------------------------------------------------------------
 		clr_proc:process(clock)
 		BEGIN
@@ -109,6 +110,7 @@ inst_memory: altsyncram
 							WHEN "100" => clrKey3  <='1';
 							WHEN OTHERS	=> clr_req<=(OTHERS=>'0');
 						END case;
+						 flag<='0';
 					ELSE
 						clr_req<=(OTHERS=>'0');
 					END IF;
@@ -119,6 +121,7 @@ inst_memory: altsyncram
 		BEGIN
 			if( clock'EVENT  AND clock = '1') then
 				   PC(PC_size-1 DOWNTO 2 ) <= next_PC;
+				   --flag<='1';
 			END IF;
 	END process;
 END behavior;
