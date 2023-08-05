@@ -24,12 +24,6 @@ ARCHITECTURE behavior OF GPIO IS
 signal CS1,CS2,CS3,CS4,CS5										   :STD_LOGIC;
 signal Leds_interface,Hex0_interface,Hex1_interface				   :STD_LOGIC_VECTOR(7 DOWNTO 0);
 signal Hex2_interface,Hex3_interface,Hex4_interface,Hex5_interface :STD_LOGIC_VECTOR(7 DOWNTO 0);
--------------------------------------------------Basic timer-------------------------------------
-signal 			BTCCR1,BTCCR0 			: STD_LOGIC_VECTOR( 31 DOWNTO 0 );
-signal			BTCNT_In 				: STD_LOGIC_VECTOR( 31 DOWNTO 0 );
-signal			BTCTL 					: STD_LOGIC_VECTOR( 7 DOWNTO 0 );
-signal			BTCNT_Out 				: STD_LOGIC_VECTOR( 31 DOWNTO 0 );
-
 -----------------------------------------------------------------------------------
 alias A11 is Address_Bus(11);
 alias A5  is Address_Bus(5);

@@ -81,7 +81,7 @@ timer_proc:process(clock)
 	variable count : integer;
 	variable BTCNT_tmp : STD_LOGIC_VECTOR( 31 DOWNTO 0 );
 		BEGIN
-			IF (reset = '0')THEN
+			IF (reset = '1')THEN
 				count:=0;
 				BTCNT<=(others=>'0');
 				BTCNT_Out<=BTCNT;

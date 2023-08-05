@@ -42,6 +42,7 @@ ARCHITECTURE behavior OF Idecode IS
 TYPE register_file IS ARRAY ( 0 TO ResSize-1 ) OF STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
 
 	SIGNAL register_array				: register_file;
+	Signal try 							: STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
 	SIGNAL write_register_address 		: STD_LOGIC_VECTOR( cmd_size-1 DOWNTO 0 );
 	SIGNAL write_data					: STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
 	SIGNAL read_register_1_address		: STD_LOGIC_VECTOR( cmd_size-1 DOWNTO 0 );
@@ -103,7 +104,9 @@ BEGIN
 
 		
 PROCESS
-	variable PC : STD_LOGIC;
+	variable PC_register : STD_LOGIC;
+	variable after_reti : STD_LOGIC;
+	variable PC_local : STD_LOGIC_VECTOR(PC_size-1 DOWNTO 0);
 	BEGIN
 		
 		WAIT UNTIL clock'EVENT AND clock = '1';
@@ -111,18 +114,25 @@ PROCESS
 					-- Initial register values on reset are register = reg#
 					-- use loop to automatically generate reset logic 
 					-- for all registers
+			after_reti:='0';
+			PC_register :='0';
 			FOR i IN 0 TO ResSize-1 LOOP
 					register_array(i) <= CONV_STD_LOGIC_VECTOR( i, ResSize );
  			END LOOP;	
 		ELSIF(INTA = '0') then
 			register_array(K0)(0) <= '0';	
-			if(PC='0') THEN
-				register_array(K1) <= zeroes(ResSize-1 downto PC_size )&PC_plus_4;
-				PC:='1';
+			if(PC_register='0') THEN
+				PC_local( PC_size-1 DOWNTO 2 )  := PC_plus_4( PC_size-1 DOWNTO 2 ) - 1;
+				PC_local( 1 DOWNTO 0 )  :="00";
+				register_array(K1) <= zeroes(ResSize-1 downto PC_size )&PC_local;
+				PC_register:='1';
 			END if;
-		ELSIF(reti='1') THEN
-			register_array(K0)(0) <= '1';	
-			PC:='0';
+		ELSIF(reti='1') THEN	
+			after_reti:='1';
+			PC_register:='0';
+		ELSIF(after_reti='1') THEN
+			register_array(K0)(0) <= '1';
+			after_reti:='0';
   		ELSIF RegWrite = '1' AND write_register_address /= 0 THEN -- Write back to register - don't write to register 0
 		      register_array(CONV_INTEGER(write_register_address)) <= write_data;
 		END IF;
