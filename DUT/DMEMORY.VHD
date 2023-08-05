@@ -32,18 +32,19 @@ END dmemory;
 ARCHITECTURE behavior OF dmemory IS
 SIGNAL write_clock    		 : STD_LOGIC;
 SIGNAL w_enable       		 : STD_LOGIC;
-SIGNAL read_data_local       : STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
+--SIGNAL read_data_local       : STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
 SIGNAL address_to_mem 		 : STD_LOGIC_VECTOR(address_size-1 DOWNTO 0);
 SIGNAL address_INTA 		 : STD_LOGIC_VECTOR(7 DOWNTO 0);
 alias isGPIO  is address(address_size_orig-1);
 alias TYPEx is Data_Bus(4 DOWNTO 0 );
 BEGIN
+
 	
-	reqType<= "000" when INTA = '0' and TYPEx= B"0"& X"0" else
-			  "001" when INTA = '0' and TYPEx= B"1"& X"0" else
-			  "010" when INTA = '0' and TYPEx= B"1"& X"4" else
-			  "011" when INTA = '0' and TYPEx= B"1"& X"8" else
-			  "100" when INTA = '0' and TYPEx= B"1"& X"C" else
+	reqType<= "000" when INTA = '0' and TYPEx= "00000" else
+			  "001" when INTA = '0' and TYPEx= "00100" else
+			  "010" when INTA = '0' and TYPEx= "00101" else
+			  "011" when INTA = '0' and TYPEx= "00110" else
+			  "100" when INTA = '0' and TYPEx= "00111" else
 			  "ZZZ";
 	
 	

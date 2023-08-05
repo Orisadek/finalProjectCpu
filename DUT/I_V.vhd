@@ -73,8 +73,17 @@ begin
 			else
 				NULL;
 			end IF;
-		else
-			null;	
+		elsif (clock'EVENT  AND clock = '0') THEN
+			BTIFG   <= (reqBT and BTIE);
+			if(reqKey1='1' and KEY1IE='1') THEN
+				KEY1IFG <= (reqKey1 and KEY1IE);
+			elsif(reqKey2='1' and KEY2IE='1') THEN 
+				KEY2IFG <= '1' ; 
+			elsif(reqKey3='1' and KEY3IE='1') THEN 
+				KEY3IFG <= '1';
+			else
+				null;
+			end IF;
 		end IF;
 	END process;
 ---------------------------------------------read iv type ------------------------------------------------	
@@ -117,18 +126,11 @@ begin
 
 
 	
-	BTIFG   <= (reqBT and BTIE);
-	KEY1IFG <= (reqKey1 and KEY1IE);
-	KEY2IFG <= (reqKey2 and KEY2IE) ; 
-	KEY3IFG <= (reqKey3 and KEY3IE );
-
-	
-	
 	TYPEx <=  "00000" WHEN reqReset='1' else
 			  "00100" WHEN (BTIFG='1'   and reqReset='0')  else
 			  "00101" WHEN (KEY1IFG='1' and BTIFG='0'   and reqReset='0') else
 			  "00110" WHEN (KEY2IFG='1' and KEY1IFG='0' and BTIFG='0'   and reqReset='0') else
-			  "00111" WHEN (KEY3IFG='1' and KEY2IFG='1' and KEY1IFG='0' and BTIFG='0' and reqReset='0') else
+			  "00111" WHEN (KEY3IFG='1' and KEY2IFG='0' and KEY1IFG='0' and BTIFG='0' and reqReset='0') else
 			  (others=>'X');
 	
 	TYPE_V(7 DOWNTO 5)<= (others=>'0');
