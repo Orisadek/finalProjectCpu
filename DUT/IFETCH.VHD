@@ -42,7 +42,7 @@ ARCHITECTURE behavior OF Ifetch IS
 	SIGNAL next_PC , MUXres  : STD_LOGIC_VECTOR( change_size-1 DOWNTO 0 );
 	SIGNAL Mem_Addr 	     : STD_LOGIC_VECTOR( address_size-1 DOWNTO 0 );
 	SIGNAL Instruction_local : STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
-	SIGNAL flag				 : STD_LOGIC;
+	--SIGNAL flag				 : STD_LOGIC;
 	alias clrReset is clr_req(0);
 	alias clrBT    is clr_req(1);
 	alias clrKey1  is clr_req(2);
@@ -110,7 +110,7 @@ inst_memory: altsyncram
 							WHEN "100" => clrKey3  <='1';
 							WHEN OTHERS	=> clr_req<=(OTHERS=>'0');
 						END case;
-						 flag<='0';
+						-- flag<='0';
 					ELSE
 						clr_req<=(OTHERS=>'0');
 					END IF;

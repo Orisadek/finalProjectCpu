@@ -126,11 +126,11 @@ begin
 
 
 	
-	TYPEx <=  "00000" WHEN reqReset='1' else
-			  "00100" WHEN (BTIFG='1'   and reqReset='0')  else
-			  "00101" WHEN (KEY1IFG='1' and BTIFG='0'   and reqReset='0') else
-			  "00110" WHEN (KEY2IFG='1' and KEY1IFG='0' and BTIFG='0'   and reqReset='0') else
-			  "00111" WHEN (KEY3IFG='1' and KEY2IFG='0' and KEY1IFG='0' and BTIFG='0' and reqReset='0') else
+	TYPEx <=  "00000" WHEN reqReset='1' else --00h
+			  "10000" WHEN (BTIFG='1'   and reqReset='0')  else -- 10h
+			  "10100" WHEN (KEY1IFG='1' and BTIFG='0'   and reqReset='0') else --14h
+			  "11000" WHEN (KEY2IFG='1' and KEY1IFG='0' and BTIFG='0'   and reqReset='0') else --18h
+			  "11100" WHEN (KEY3IFG='1' and KEY2IFG='0' and KEY1IFG='0' and BTIFG='0' and reqReset='0') else --1Ch
 			  (others=>'X');
 	
 	TYPE_V(7 DOWNTO 5)<= (others=>'0');

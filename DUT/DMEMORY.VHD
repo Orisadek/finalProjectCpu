@@ -32,7 +32,6 @@ END dmemory;
 ARCHITECTURE behavior OF dmemory IS
 SIGNAL write_clock    		 : STD_LOGIC;
 SIGNAL w_enable       		 : STD_LOGIC;
---SIGNAL read_data_local       : STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
 SIGNAL address_to_mem 		 : STD_LOGIC_VECTOR(address_size-1 DOWNTO 0);
 SIGNAL address_INTA 		 : STD_LOGIC_VECTOR(7 DOWNTO 0);
 alias isGPIO  is address(address_size_orig-1);
@@ -40,15 +39,16 @@ alias TYPEx is Data_Bus(4 DOWNTO 0 );
 BEGIN
 
 	
+	
 	reqType<= "000" when INTA = '0' and TYPEx= "00000" else
-			  "001" when INTA = '0' and TYPEx= "00100" else
-			  "010" when INTA = '0' and TYPEx= "00101" else
-			  "011" when INTA = '0' and TYPEx= "00110" else
-			  "100" when INTA = '0' and TYPEx= "00111" else
+			  "001" when INTA = '0' and TYPEx= "10000" else
+			  "010" when INTA = '0' and TYPEx= "10100" else
+			  "011" when INTA = '0' and TYPEx= "11000" else
+			  "100" when INTA = '0' and TYPEx= "11100" else
 			  "ZZZ";
 	
 	
-	address_INTA<=address(9 DOWNTO 2) when INTA='1' else "000"&TYPEx;
+	address_INTA<=address(9 DOWNTO 2) when INTA='1' else "00000"&TYPEx(4 DOWNTO 2);
 	
 	ModelSim_D: if (isModelSim=TRUE) generate --- insert condition to modelsim 
 		address_to_mem <=address_INTA;

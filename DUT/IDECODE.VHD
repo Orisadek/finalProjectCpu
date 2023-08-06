@@ -101,20 +101,23 @@ BEGIN
 		and J = '1') ELSE
 		B"111111" & Instruction_imm_value_J when (Instruction_imm_value_J(Imm_val_J-1) = '1' 
 		and J = '1');
-
-		
+			
+--reti_proc:process(reti)
+--		BEGIN
+--		IF(reti='1') THEN	
+			--PC_register:='0';
+--			register_array(K0)(0) <= '1';
+	--	END IF;
+--	END PROCESS;
 PROCESS
 	variable PC_register : STD_LOGIC;
-	variable after_reti : STD_LOGIC;
 	variable PC_local : STD_LOGIC_VECTOR(PC_size-1 DOWNTO 0);
 	BEGIN
-		
 		WAIT UNTIL clock'EVENT AND clock = '1';
 		IF reset_local = '1' THEN
 					-- Initial register values on reset are register = reg#
 					-- use loop to automatically generate reset logic 
 					-- for all registers
-			after_reti:='0';
 			PC_register :='0';
 			FOR i IN 0 TO ResSize-1 LOOP
 					register_array(i) <= CONV_STD_LOGIC_VECTOR( i, ResSize );
@@ -128,15 +131,11 @@ PROCESS
 				PC_register:='1';
 			END if;
 		ELSIF(reti='1') THEN	
-			after_reti:='1';
 			PC_register:='0';
-		ELSIF(after_reti='1') THEN
 			register_array(K0)(0) <= '1';
-			after_reti:='0';
   		ELSIF RegWrite = '1' AND write_register_address /= 0 THEN -- Write back to register - don't write to register 0
 		      register_array(CONV_INTEGER(write_register_address)) <= write_data;
 		END IF;
-		
 END PROCESS;
 	GIE <= register_array(K0)(0);
 END behavior;
