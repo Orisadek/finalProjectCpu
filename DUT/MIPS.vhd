@@ -52,7 +52,7 @@ ARCHITECTURE structure OF MIPS IS
 	SIGNAL Instruction			: STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
 	SIGNAL JumpAdress			: STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
 	SIGNAL read_data_mem 		: STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 ); 
-	SIGNAL INTA_local1,INTA_local			: STD_LOGIC;
+	SIGNAL INTA_insert,INTA_local			: STD_LOGIC;
 	SIGNAL reset_local_mips   	: STD_LOGIC;
 	SIGNAL reqType				: STD_LOGIC_VECTOR( 2 DOWNTO 0 );
 	SIGNAL clr_req_local        : STD_LOGIC_VECTOR( 4 DOWNTO 0 );
@@ -73,19 +73,13 @@ BEGIN
 	clk_INTR_proc:process(clock)
 		BEGIN
 			if(clock'EVENT AND clock='1')then
-				INTA_local<=INTA_local1;
+				INTA_local<=INTA_insert;
 			END IF;
 	END process;
 	
+	
+	INTA_insert<='0' WHEN INTR='1' else '1';
 
-	INTR_proc:process(INTR)
-		BEGIN
-			if(INTR'EVENT AND INTR='1')then
-				INTA_local1<='0';
-			elsif(INTR'EVENT AND INTR='0') then
-				INTA_local1<='1';
-			END IF;
-	END process;
 				
 	
 	
