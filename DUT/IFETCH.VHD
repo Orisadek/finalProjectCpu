@@ -21,7 +21,7 @@ generic ( isModelSim  : boolean;
 		); 
 	PORT(	 Instruction 		: OUT	STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
         	 PC_plus_4_out  	: OUT	STD_LOGIC_VECTOR( PC_size-1 DOWNTO 0 ); 
-			 PC_out 			: OUT	STD_LOGIC_VECTOR( PC_size-1 DOWNTO 0 );
+			 PC_out 			   : OUT	STD_LOGIC_VECTOR( PC_size-1 DOWNTO 0 );
 			 reset_local		: OUT	STD_LOGIC;
 			 clr_req			: OUT   STD_LOGIC_VECTOR( 4 DOWNTO 0 );
         	 Add_result 		: IN 	STD_LOGIC_VECTOR( change_size-1 DOWNTO 0 );
@@ -58,7 +58,7 @@ inst_memory: altsyncram
 		widthad_a => address_size,
 		lpm_type => "altsyncram",
 		outdata_reg_a => "UNREGISTERED",
-		init_file => "C:\Users\orisa\source\modelSim\work\L1_Caches\hex_interrupts\prog_hex6.hex",
+		init_file => "D:\finalProjectCpu-master_1556\finalProjectCpu-master\L1_Caches\program.hex",
 		intended_device_family => "Cyclone"
 	)
 	PORT MAP (
@@ -66,8 +66,8 @@ inst_memory: altsyncram
 		address_a 	=> Mem_Addr, 
 		q_a 			=> Instruction_local );
 		
-		Instruction<=Instruction_local WHEN not (INTA = '0') ELSE
-					(others=>'0');
+		Instruction<= Instruction_local WHEN not (INTA = '0') ELSE
+					 (others=>'0');
 					-- Instructions always start on word address - not byte
 		PC(1 DOWNTO 0) <= "00";
 					-- copy output signals - allows read inside module
@@ -75,6 +75,8 @@ inst_memory: altsyncram
 		PC_plus_4_out 	<= PC_plus_4;
 						-- send address to inst. memory address register
 						
+		---------------------------------choose between ModelSim and Quartus----------------------
+				
 		ModelSim_I: if (isModelSim=TRUE) generate --- insert condition to modelsim 
 						Mem_Addr <=next_PC;
 		END generate ModelSim_I;
@@ -84,12 +86,12 @@ inst_memory: altsyncram
 		END generate Quartus_I;
 					
 						-- Adder to increment PC by 4        
-      	PC_plus_4( PC_size-1 DOWNTO 2 )  <= PC( PC_size-1 DOWNTO 2 ) + 1;
+      	PC_plus_4( PC_size-1 DOWNTO 2 )  <= PC( PC_size-1 DOWNTO 2 ) + 1 ;
        	PC_plus_4( 1 DOWNTO 0 )  <= "00";
 						-- Mux to select Branch Address or PC + 4        
 		MUXres  <= Add_result  WHEN ( (( Branch(0) = '1' ) AND ( Zero = '1' )) or(( Branch(1) = '1' ) AND ( Zero = '0' )) )
 					ELSE   PC_plus_4( PC_size-1 DOWNTO 2 );
-			
+		---------------------------------choose the next PC----------------------
 		next_PC <= MUXres when (Jump = "00" and  INTA='1') else 
 				   data_reg(PC_size-1 DOWNTO 2 ) when (Jump = "01" and  INTA='1') else --jr 
 				   JumpAdress( PC_size-1 DOWNTO 2 ) when ((Jump = "10" or Jump = "11") and  INTA='1') else --jal,j
@@ -115,7 +117,7 @@ inst_memory: altsyncram
 					END IF;
 			END IF;
 		END process;
-		
+		------------------------------------insert PC ----------------------------------
 		fetch_proc:process(clock)
 		BEGIN
 			if( clock'EVENT  AND clock = '1') then

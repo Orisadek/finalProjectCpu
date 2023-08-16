@@ -42,7 +42,6 @@ SIGNAL ALU_output_mux		: STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
 SIGNAL Branch_Add 			: STD_LOGIC_VECTOR( add_res_size-1 DOWNTO 0 );
 SIGNAL ALU_ctl				: STD_LOGIC_VECTOR( 3 DOWNTO 0 );
 SIGNAL zeroes				: STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
---SIGNAL shamt_int           : integer;
 
 
 BEGIN
@@ -50,8 +49,8 @@ BEGIN
 	zeroes<=(OTHERS =>'0');
 
 						-- ALU input mux
-	Binput <= Read_data_2 WHEN (ALUSrc = '0' or ALUOp(0) = '1') --Mux for Binput 
-		else  Sign_extend;
+	Binput <= Read_data_2 WHEN (ALUSrc = '0' or ALUOp(0) = '1')else  --Mux for Binput 
+			  Sign_extend;
 					
 					
 	--shamt_int<= CONV_INTEGER(shamt); --We converted to integer for validity

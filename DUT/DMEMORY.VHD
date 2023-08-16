@@ -38,8 +38,7 @@ alias isGPIO  is address(address_size_orig-1);
 alias TYPEx is Data_Bus(4 DOWNTO 0 );
 BEGIN
 
-	
-	
+-------------------------------type req------------------------------------
 	reqType<= "000" when INTA = '0' and TYPEx= "00000" else
 			  "001" when INTA = '0' and TYPEx= "10000" else
 			  "010" when INTA = '0' and TYPEx= "10100" else
@@ -47,9 +46,11 @@ BEGIN
 			  "100" when INTA = '0' and TYPEx= "11100" else
 			  "ZZZ";
 	
-	
+
+----------------------------------------choose between address and Type------------------- 	
 	address_INTA<=address(9 DOWNTO 2) when INTA='1' else "00000"&TYPEx(4 DOWNTO 2);
 	
+---------------------------------choose between ModelSim and Quartus----------------------
 	ModelSim_D: if (isModelSim=TRUE) generate --- insert condition to modelsim 
 		address_to_mem <=address_INTA;
 	END generate ModelSim_D;
@@ -57,6 +58,7 @@ BEGIN
 	Quartus_D: if (isModelSim=FALSE) generate --- insert condition to quartus
 		address_to_mem <=address_INTA&"00";
 	END generate Quartus_D;
+
 	
 	w_enable <= '1' when (Memwrite='1' and isGPIO='0') else '0'; -- make sure isn't GPIO
 	
@@ -67,7 +69,7 @@ BEGIN
 		widthad_a => address_size,
 		lpm_type => "altsyncram",
 		outdata_reg_a => "UNREGISTERED",
-		init_file => "C:\Users\orisa\source\modelSim\work\L1_Caches\hex_interrupts\data_hex6.hex",
+		init_file => "D:\finalProjectCpu-master_1556\finalProjectCpu-master\L1_Caches\dmemory.hex",
 		intended_device_family => "Cyclone"
 	)
 	PORT MAP (

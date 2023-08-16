@@ -39,41 +39,28 @@ END Idecode;
 
 
 ARCHITECTURE behavior OF Idecode IS
-TYPE register_file IS ARRAY ( 0 TO ResSize-1 ) OF STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
-
-	SIGNAL register_array				: register_file;
-	Signal try 							: STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
-	SIGNAL write_register_address 		: STD_LOGIC_VECTOR( cmd_size-1 DOWNTO 0 );
-	SIGNAL write_data					: STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
-	SIGNAL read_register_1_address		: STD_LOGIC_VECTOR( cmd_size-1 DOWNTO 0 );
-	SIGNAL read_register_2_address		: STD_LOGIC_VECTOR( cmd_size-1 DOWNTO 0 );
-	SIGNAL write_register_address_1		: STD_LOGIC_VECTOR( cmd_size-1 DOWNTO 0 );
-	SIGNAL write_register_address_0		: STD_LOGIC_VECTOR( cmd_size-1 DOWNTO 0 );
-	SIGNAL Instruction_imm_value_I		: STD_LOGIC_VECTOR( Imm_val_I-1 DOWNTO 0 );
-	SIGNAL Instruction_imm_value_J		: STD_LOGIC_VECTOR( Imm_val_J-1 DOWNTO 0 );
-	SIGNAL zeroes					    : STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
-	SIGNAL J				            : STD_LOGIC;
-	SIGNAL reti               	        : STD_LOGIC;
-	alias Opcode  IS Instruction( 31 DOWNTO 26 );
-	alias func_op IS Instruction( 5 DOWNTO 0 );
-	alias clrReset is clr_req(0);
-	
-	
-	
+TYPE     register_file IS ARRAY ( 0 TO ResSize-1 ) OF STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
+SIGNAL  register_array				: register_file;
+SIGNAL  write_register_address 		: STD_LOGIC_VECTOR( cmd_size-1 DOWNTO 0 );
+SIGNAL  write_data					: STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
+SIGNAL  J				            : STD_LOGIC;
+SIGNAL  reti               	        : STD_LOGIC;
+alias   Opcode  IS Instruction( 31 DOWNTO 26 );
+alias   func_op IS Instruction( 5 DOWNTO 0 );
+alias   clrReset is clr_req(0);
+alias   read_register_1_address  is Instruction( 25 DOWNTO 21 );
+alias   read_register_2_address  is Instruction( 20 DOWNTO 16 );
+alias   write_register_address_1 is Instruction( 15 DOWNTO 11 );
+alias   write_register_address_0 is Instruction( 20 DOWNTO 16 );
+alias   imm_value_I  is Instruction( Imm_val_I-1 DOWNTO 0 ); --decompositioning Immediate part of the intruction
+alias	imm_value_J  is Instruction( Imm_val_J-1 DOWNTO 0 );	
 BEGIN
-	read_register_1_address 	<= Instruction( 25 DOWNTO 21 );
-   	read_register_2_address 	<= Instruction( 20 DOWNTO 16 );
-   	write_register_address_1	<= Instruction( 15 DOWNTO 11 );
-   	write_register_address_0 	<= Instruction( 20 DOWNTO 16 );
 	
-   	Instruction_imm_value_I <= Instruction( Imm_val_I-1 DOWNTO 0 ); --decompositioning Immediate part of the intruction
-	Instruction_imm_value_J  <=Instruction( Imm_val_J-1 DOWNTO 0 );
-	J <= '1' when (Instruction(ResSize-1 downto 26) = "000010" or Instruction(ResSize-1 downto 26) = "000011") ELSE --detecting wether J type is required
+	J <= '1' when (Opcode = "000010" or Opcode = "000011") ELSE --detecting wether J type is required
 	'0'; --- jmp or jal
-	zeroes<=(OTHERS =>'0');
 					-- Read Register 1 Operation
 					
-	reti <= '1' when (CONV_INTEGER( read_register_1_address ) = K1 and Opcode=X"00"&B"00" and func_op = "001000") else '0';
+	reti <= '1' when (CONV_INTEGER(read_register_1_address) = K1 and Opcode=X"00"&B"00" and func_op = "001000") else '0';
 	
 	read_data_1 <= register_array( CONV_INTEGER( read_register_1_address ) );
 					-- Read Register 2 Operation		 
@@ -89,26 +76,15 @@ BEGIN
 					-- Mux to bypass data memory for Rformat instructions
 	write_data <= ALU_result( ResSize-1 DOWNTO 0 ) WHEN  MemtoReg = "00"    ELSE 
 				  read_data  WHEN ( MemtoReg = "01" ) ELSE  
-				  zeroes(ResSize-1 downto PC_size )&PC_plus_4 WHEN MemtoReg = "10"  ELSE   
+				  X"00000"&B"00"&PC_plus_4 WHEN MemtoReg = "10"  ELSE   
 				  (others=>'0');
 					-- Sign Extend 16-bits to 32-bits
 		--- sign extention
-    	Sign_extend <= X"0000" & Instruction_imm_value_I WHEN (Instruction_imm_value_I(Imm_val_I-1) = '0' 
-		and J = '0') ELSE
-		X"FFFF" & Instruction_imm_value_I when (Instruction_imm_value_I(Imm_val_I-1) = '1' 
-		and J = '0') ELSE
-		B"000000" & Instruction_imm_value_J WHEN (Instruction_imm_value_J(Imm_val_J-1) = '0' 
-		and J = '1') ELSE
-		B"111111" & Instruction_imm_value_J when (Instruction_imm_value_J(Imm_val_J-1) = '1' 
-		and J = '1');
+    	Sign_extend <= X"0000" & imm_value_I WHEN ((imm_value_I(Imm_val_I-1) = '0' and J = '0') or Opcode="001101") ELSE
+		X"FFFF" & imm_value_I when (imm_value_I(Imm_val_I-1) = '1' and J = '0') ELSE
+		B"000000" & imm_value_J WHEN (imm_value_J(Imm_val_J-1) = '0' and J = '1') ELSE
+		B"111111" & imm_value_J when (imm_value_J(Imm_val_J-1) = '1' and J = '1');
 			
---reti_proc:process(reti)
---		BEGIN
---		IF(reti='1') THEN	
-			--PC_register:='0';
---			register_array(K0)(0) <= '1';
-	--	END IF;
---	END PROCESS;
 PROCESS
 	variable PC_register : STD_LOGIC;
 	variable PC_local : STD_LOGIC_VECTOR(PC_size-1 DOWNTO 0);
@@ -127,7 +103,7 @@ PROCESS
 			if(PC_register='0') THEN
 				PC_local( PC_size-1 DOWNTO 2 )  := PC_plus_4( PC_size-1 DOWNTO 2 ) - 1;
 				PC_local( 1 DOWNTO 0 )  :="00";
-				register_array(K1) <= zeroes(ResSize-1 downto PC_size )&PC_local;
+				register_array(K1) <= X"00000"&B"00"&PC_local;
 				PC_register:='1';
 			END if;
 		ELSIF(reti='1') THEN	

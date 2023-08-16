@@ -197,7 +197,7 @@ COMPONENT BasicTimer IS
 	PORT(	BTCCR1,BTCCR0 			: IN	STD_LOGIC_VECTOR( 31 DOWNTO 0 );
 			BTCNT_In 				: IN	STD_LOGIC_VECTOR( 31 DOWNTO 0 );
 			BTCTL 					: IN	STD_LOGIC_VECTOR( 7 DOWNTO 0 );
-			clock,reset 			: IN	STD_LOGIC;
+			clock,reset_timer 			: IN	STD_LOGIC;
 			CS7		 				: IN	STD_LOGIC;
 			OUT_signal 				: OUT	STD_LOGIC;
 			set_TBIFG 				: OUT	STD_LOGIC;
@@ -229,7 +229,7 @@ END 	COMPONENT;
 COMPONENT BT_Interface IS
 	generic (ResSize : positive := 32;
 			address_size_orig :positive:=12); 
-	PORT(  clock,reset       			 : IN 	 STD_LOGIC;
+	PORT(  clock,reset_timer       		 : IN 	 STD_LOGIC;
 		   memRead,	memWrite 			 : IN 	 STD_LOGIC;
 		   Address_Bus       			 : IN 	 STD_LOGIC_VECTOR( address_size_orig-1 DOWNTO 0 );
 		   Data_Bus         			 : INOUT STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );

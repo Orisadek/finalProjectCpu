@@ -10,7 +10,7 @@ ENTITY BT_Interface IS
 	generic (ResSize : positive := 32;
 			address_size_orig :positive:=12
 			); 
-	PORT(  clock,reset       			 : IN 	 STD_LOGIC;
+	PORT(  clock,reset_timer       	     : IN 	 STD_LOGIC;
 		   memRead,	memWrite 			 : IN 	 STD_LOGIC;
 		   Address_Bus       			 : IN 	 STD_LOGIC_VECTOR( address_size_orig-1 DOWNTO 0 );
 		   Data_Bus         			 : INOUT STD_LOGIC_VECTOR( ResSize-1 DOWNTO 0 );
@@ -40,7 +40,7 @@ BEGIN
 	CS8<='1' when (A11='1' and A5='1' and A4='0' and A3='0' and A2='1' and A1='0') else '0'; --BTCCR0
 	CS9<='1' when (A11='1' and A5='1' and A4='0' and A3='1' and A2='0' and A1='0') else '0'; --BTCCR1
 	
-		
+	-----------------------------------write to Data bus	
 	Data_Bus <=X"000000"&BTCTL  when (CS6='1' and memRead='1') else (others=>'Z');
 	Data_Bus <=BTCNT_Out 		when (CS7='1' and memRead='1') else (others=>'Z');
 	Data_Bus <=BTCCR0			when (CS8='1' and memRead='1') else (others=>'Z');
@@ -52,31 +52,33 @@ BEGIN
 			BTCNT_In 			    => BTCNT_In,
 			BTCTL 					=> BTCTL,
 			clock 					=> clock,
-			reset                   => reset,
+			reset_timer             => reset_timer,
 			CS7		 				=> CS7,
 			OUT_signal 				=> OUT_signal,
 			set_TBIFG 				=> set_TBIFG,
 			BTCNT_Out 				=> BTCNT_Out
 			);
 			
-
+---------------------------------write to timer---------------------------------------
 timer_insert_proc:process(clock)
 		BEGIN
-			IF (reset = '1')THEN
-				BTCTL <=(5=>'1',others=>'0');
-				BTCNT_In<=(others=>'0');
-				BTCCR0 <=(others=>'0');
-				BTCCR1 <= (others=>'0');
-			elsif (clock'EVENT  AND clock = '0' and CS6='1' and memWrite='1')THEN
-				BTCTL <= Data_Bus(7 DOWNTO 0);
-			elsif (clock'EVENT  AND clock = '0' and CS7='1' and memWrite='1')THEN
-				BTCNT_In <= Data_Bus ;
-			elsif (clock'EVENT  AND clock = '0' and CS8='1' and memWrite='1')THEN
-				BTCCR0	 <= Data_Bus;
-			elsif (clock'EVENT  AND clock = '0' and CS9='1' and memWrite='1')THEN
-				BTCCR1	 <= Data_Bus; 
-			else 
-				null;
+			if (clock'EVENT  AND clock = '0')THEN
+				IF(reset_timer = '1')THEN
+					BTCTL <=(5=>'1',others=>'0');
+					BTCNT_In<=(others=>'0');
+					BTCCR0 <=(others=>'0');
+					BTCCR1 <= (others=>'0');
+				elsif(CS6='1' and memWrite='1') THEN
+					BTCTL <= Data_Bus(7 DOWNTO 0);
+				elsif(CS7='1' and memWrite='1')THEN
+					BTCNT_In <= Data_Bus ;
+				elsif(CS8='1' and memWrite='1')THEN
+					BTCCR0	 <= Data_Bus;
+				elsif(CS9='1' and memWrite='1')THEN
+					BTCCR1	 <= Data_Bus; 
+				else 
+					null;
+				END IF;
 			END IF;
 		END process;
 	

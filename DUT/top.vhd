@@ -9,8 +9,8 @@ USE work.aux_package.all;
 ENTITY top IS
 	generic (ResSize : positive := 32;
 			address_size_orig :positive:=12;
-			isModelSim  : boolean :=TRUE;
-			adress_size  : positive :=8
+			isModelSim  : boolean :=false;
+			adress_size  : positive :=10
 			); 
 	PORT(  reset,ena, clock				 : IN 	STD_LOGIC; 
 		   SW   						 : IN 	STD_LOGIC_VECTOR(7 DOWNTO 0);
@@ -63,11 +63,11 @@ BEGIN
 				
 	BT_Interface_portmap: BT_Interface
 	PORT MAP (	clock 		=> clock,
-				reset 		=> reset_local, 
+				reset_timer => reset_local, 
 				memRead 	=> memRead,
 				memWrite 	=> memWrite, 		
 				Address_Bus => Address_Bus, 
-				Data_Bus	=>Data_Bus, 				
+				Data_Bus	=> Data_Bus, 				
 				OUT_signal  => OUT_signal,      			 
 				set_TBIFG 	=> set_TBIFG					 
 				);
